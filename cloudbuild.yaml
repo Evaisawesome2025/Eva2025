@@ -9,7 +9,8 @@ steps:
   args: ['push','${_REGION}-docker.pkg.dev/black-stream-468918-m5/${_REPO}/${_SERVICE}:$SHORT_SHA']
 - name: gcr.io/google.com/cloudsdktool/cloud-sdk
   entrypoint: gcloud
-  args: ['run','deploy','${_SERVICE}','--image','${_REGION}-docker.pkg.dev/black-stream-468918-m5/${_REPO}/${_SERVICE}:$SHORT_SHA',
+  args: ['run','deploy','${_SERVICE}',
+         '--image','${_REGION}-docker.pkg.dev/black-stream-468918-m5/${_REPO}/${_SERVICE}:$SHORT_SHA',
          '--region','${_REGION}','--platform','managed','--allow-unauthenticated',
          '--cpu','1','--memory','512Mi','--min-instances','0','--max-instances','3','--concurrency','80']
 images:
