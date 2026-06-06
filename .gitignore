@@ -35,3 +35,7 @@ google-services.json
 
 # Vercel static build output
 _site/
+
+# Python
+__pycache__/
+*.pyc
