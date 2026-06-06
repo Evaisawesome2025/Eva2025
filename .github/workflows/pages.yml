@@ -1,10 +1,9 @@
 name: Deploy game to GitHub Pages
 
+# Manual-only: GitHub Pages must first be enabled in repo Settings → Pages
+# (Source: "GitHub Actions"). Once enabled, run this workflow from the Actions
+# tab (or ask the assistant to trigger it) to publish the game.
 on:
-  push:
-    branches:
-      - claude/cool-addictive-game-lLGPu
-      - main
   workflow_dispatch:
 
 permissions:
