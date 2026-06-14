@@ -1,14 +1,15 @@
+import "./globals.css";
+
 export const metadata = {
-  title: "Doodle Jump",
-  description: "A Doodle Jump-style canvas game",
+  title: "Flowline — Your AI marketing manager for local business",
+  description:
+    "Flowline is an AI agent that runs your Google Ads, Meta ads, website, and lead follow-up — measured in booked jobs and dollars, not clicks. Built for small service businesses.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, padding: 0, height: "100vh", background: "#1d2433" }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
