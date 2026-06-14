@@ -14,8 +14,8 @@ business:
 
 # Economics — fill these in; everything downstream depends on them.
 economics:
-  avg_job_value: 165.00             # average ticket for a dryer vent cleaning ($)
-  avg_job_value_with_upsell: 320.00 # when air-duct / vent-guard upsell lands ($)
+  avg_job_value: 129.00             # base price for a dryer vent cleaning ($)
+  avg_job_value_with_upsell: 0.00   # TODO: avg ticket when an upsell lands ($)
   gross_margin_pct: 0.70            # rough margin per job after tech cost
   lead_to_booking_rate: 0.45        # % of leads that become booked jobs (your close rate)
   # Derived ceiling (for reference): max cost per booking should stay below
@@ -47,8 +47,8 @@ analytics:
     min_call_seconds_as_lead: 30    # calls shorter than this don't count as a real lead
 
 website:
-  platform: "wordpress"             # or: vercel-git | netlify-git | other
-  base_url: "https://REPLACE_ME"
+  platform: "wordpress"             # or: vercel-git | netlify-git | other — confirm actual stack
+  base_url: "https://www.freshflowsiouxfalls.com"
   booking_url: "https://REPLACE_ME" # online scheduler if any
   primary_cta: "call"               # call | book-online | form — what we optimize toward
 
