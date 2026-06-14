@@ -1,0 +1,4 @@
+config/credentials.env
+config/*.json
+logs/
+*.log
