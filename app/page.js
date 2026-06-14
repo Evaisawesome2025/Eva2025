@@ -1,66 +1,161 @@
-"use client";
-import { useState } from "react";
+import Link from "next/link";
 
-const games = [
-  { id: "fruit-frenzy", title: "Fruit Frenzy", emoji: "🍓", src: "/fruit-frenzy.html", desc: "Catch fruit, dodge bombs, build combos!" },
-  { id: "doodle-jump", title: "Doodle Jump", emoji: "🐸", src: "/doodle-jump.html", desc: "Bounce your way up the platforms!" },
+const features = [
+  {
+    icon: "📈",
+    title: "Runs your ads, both platforms",
+    body: "Connect Google Ads (Search + Local Services) and Meta. Flowline watches spend, finds wasted budget, refreshes tired creative, and shifts money toward whatever is booking jobs cheapest.",
+  },
+  {
+    icon: "🌐",
+    title: "Builds and runs your website",
+    body: "No website? Flowline generates and hosts a professional one from your services in seconds. Already have one? It reads your funnel and drafts page changes that turn more visitors into booked jobs.",
+  },
+  {
+    icon: "📞",
+    title: "Never lets a lead go cold",
+    body: "Every call and form fill is tracked. If a lead wasn't called back fast, Flowline drafts the follow-up text in seconds — because speed-to-lead wins the job.",
+  },
+  {
+    icon: "⭐",
+    title: "Protects your reputation",
+    body: "Drafts replies to every Google review, keeps your Business Profile sharp, and flags reputation risks — nothing posts publicly without your OK.",
+  },
+  {
+    icon: "🧮",
+    title: "Thinks in dollars, not clicks",
+    body: "One honest number leads every report: cost per booked job vs. your profit per job. No vanity metrics, no dashboards you have to decode.",
+  },
+  {
+    icon: "💬",
+    title: "Just text it like an employee",
+    body: 'Chat with your agent from the number you choose. "How did we do this week?" "Any leads we missed?" "Where am I wasting money?" It answers from your real numbers.',
+  },
 ];
 
-export default function Home() {
-  const [game, setGame] = useState(null);
+const steps = [
+  { h: "Tell it about your business", p: "Name, website, services, and the phone number you'll use to chat with it." },
+  { h: "Connect your accounts", p: "Google Ads, Meta, your website, and call tracking — read-only to start." },
+  { h: "It learns your funnel", p: "Spend → leads → bookings → revenue, per channel, against your targets." },
+  { h: "You stay in control", p: "It drafts everything. Nothing spends money or faces a customer without your approval." },
+];
 
-  if (game) {
-    return (
-      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
-        <button
-          onClick={() => setGame(null)}
+export default function Landing() {
+  return (
+    <div>
+      <nav className="nav">
+        <div className="brand">
+          <span className="brand-mark">≈</span> Flowline
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Link className="btn btn-ghost btn-sm" href="/dashboard">
+            Sign in
+          </Link>
+          <Link className="btn btn-primary btn-sm" href="/onboarding">
+            Get started
+          </Link>
+        </div>
+      </nav>
+
+      <header className="hero wrap">
+        <span className="eyebrow">AI marketing manager for local business</span>
+        <h1 className="title">
+          The agent that runs your marketing,{" "}
+          <span className="gradient-text">so you can run your business.</span>
+        </h1>
+        <p className="subtitle">
+          Flowline connects your Google Ads, Meta, website, and leads into one AI
+          agent you can just talk to. It works the way an owner thinks — in booked
+          jobs and dollars — and never spends a cent or messages a customer without
+          your say-so.
+        </p>
+        <div className="hero-cta">
+          <Link className="btn btn-primary" href="/onboarding">
+            Set up my business →
+          </Link>
+          <Link className="btn btn-ghost" href="/dashboard">
+            See a live dashboard
+          </Link>
+        </div>
+        <div className="hero-note">
+          Built for trades and local services — like FreshFlow Dryer Vent Cleaning,
+          our first business. Free to set up.
+        </div>
+      </header>
+
+      <section className="section wrap">
+        <h2>One agent. Your whole front office.</h2>
+        <p className="lead">
+          Stop stitching together five dashboards and a marketing agency. Flowline
+          handles the surfaces that actually bring in jobs.
+        </p>
+        <div className="grid grid-3">
+          {features.map((f) => (
+            <div className="card" key={f.title}>
+              <div className="ic">{f.icon}</div>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section wrap">
+        <h2>Up and running in four steps</h2>
+        <p className="lead">
+          No contracts, no onboarding calls. You can connect everything yourself in
+          a few minutes.
+        </p>
+        <div className="steps">
+          {steps.map((s, i) => (
+            <div className="step" key={s.h}>
+              <div className="n">{i + 1}</div>
+              <h4>{s.h}</h4>
+              <p>{s.p}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section wrap">
+        <div
+          className="card"
           style={{
-            position: "absolute", top: 12, left: 12, zIndex: 10,
-            padding: "8px 16px", borderRadius: 20, border: "none",
-            background: "rgba(255,255,255,0.85)", fontWeight: 700,
-            cursor: "pointer", fontSize: 14,
+            background: "linear-gradient(135deg, #0e1726, #18324a)",
+            color: "#fff",
+            textAlign: "center",
+            padding: "40px 28px",
+            border: "none",
           }}
         >
-          ← Arcade
-        </button>
-        <iframe
-          src={game.src}
-          title={game.title}
-          style={{ border: "none", width: "100%", height: "100%", display: "block" }}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <main
-      style={{
-        minHeight: "100vh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center", gap: 24,
-        background: "linear-gradient(180deg, #16213e, #0f3460)",
-        fontFamily: "system-ui, sans-serif", padding: 24,
-      }}
-    >
-      <h1 style={{ color: "#fff", fontSize: 42, margin: 0 }}>🕹️ Eva&apos;s Arcade</h1>
-      <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>Pick a game!</p>
-      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
-        {games.map((g) => (
-          <button
-            key={g.id}
-            onClick={() => setGame(g)}
+          <h2 style={{ color: "#fff", margin: "0 0 8px" }}>
+            You stay the boss. It does the busywork.
+          </h2>
+          <p
             style={{
-              width: 220, padding: 24, borderRadius: 16, border: "none",
-              background: "rgba(255,255,255,0.1)", color: "#fff",
-              cursor: "pointer", textAlign: "center",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+              color: "rgba(255,255,255,0.78)",
+              maxWidth: 560,
+              margin: "0 auto 22px",
+              fontSize: 16,
+              lineHeight: 1.55,
             }}
           >
-            <div style={{ fontSize: 56 }}>{g.emoji}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, marginTop: 8 }}>{g.title}</div>
-            <div style={{ fontSize: 14, opacity: 0.7, marginTop: 6 }}>{g.desc}</div>
-          </button>
-        ))}
-      </div>
-    </main>
+            Two rules are always on: nothing that affects spend, and nothing a
+            customer would see, goes live without your explicit approval. Flowline
+            earns trust on read-only work first.
+          </p>
+          <Link className="btn btn-primary" href="/onboarding">
+            Create my account
+          </Link>
+        </div>
+      </section>
+
+      <footer className="footer">
+        <div className="wrap">
+          Flowline · AI marketing operations for local service businesses ·
+          Spend gate &amp; reputation gate always on.
+        </div>
+      </footer>
+    </div>
   );
 }

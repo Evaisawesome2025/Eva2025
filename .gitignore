@@ -37,3 +37,6 @@ google-services.json
 node_modules/
 .next/
 out/
+
+# Flowline local account store
+.data/
