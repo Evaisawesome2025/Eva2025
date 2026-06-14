@@ -14,7 +14,8 @@ export async function GET(request) {
   return NextResponse.json({ insights: buildInsights(account) });
 }
 
-// POST /api/agent  { id, message } -> a chat reply from the agent.
+// POST /api/agent  { id?, account?, message } -> a chat reply from the agent.
+// Accepts the account inline so chat works on hosts without persistence.
 export async function POST(request) {
   let body;
   try {
@@ -22,7 +23,7 @@ export async function POST(request) {
   } catch {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
   }
-  const account = await getAccount(body.id);
+  const account = body.account || (await getAccount(body.id));
   if (!account) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const { reply, mode } = await generateReply(account, body.message || "");
   return NextResponse.json({ reply, mode });

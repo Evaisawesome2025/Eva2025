@@ -174,7 +174,10 @@ export default function Onboarding() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Could not save your business.");
+      // Save the full account in the browser so the dashboard + hosted site work
+      // on any host, including serverless with no persistent storage.
       localStorage.setItem("flowline_account_id", data.account.id);
+      localStorage.setItem("flowline_account", JSON.stringify(data.account));
       router.push("/dashboard");
     } catch (e) {
       setError(e.message);

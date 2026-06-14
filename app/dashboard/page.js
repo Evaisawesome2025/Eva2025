@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { buildInsights } from "../../lib/insights.js";
 
 const money = (n) => (n == null ? "—" : "$" + Number(n).toLocaleString());
 
@@ -13,30 +14,42 @@ export default function Dashboard() {
   const [signinErr, setSigninErr] = useState("");
 
   useEffect(() => {
-    const id =
-      typeof window !== "undefined"
-        ? localStorage.getItem("flowline_account_id")
-        : null;
-    if (!id) {
-      setStatus("signin");
+    if (typeof window === "undefined") return;
+    // Primary source of truth is the account saved in the browser — works on
+    // any host, including serverless with no persistent filesystem.
+    try {
+      const raw = localStorage.getItem("flowline_account");
+      if (raw) {
+        useAccount(JSON.parse(raw));
+        return;
+      }
+    } catch {}
+    const id = localStorage.getItem("flowline_account_id");
+    if (id) {
+      loadFromServer(id);
       return;
     }
-    load(id);
+    setStatus("signin");
   }, []);
 
-  async function load(id) {
+  function useAccount(acc) {
+    setAccount(acc);
+    setInsights(buildInsights(acc));
+    setStatus("ready");
+  }
+
+  // Fallback path: fetch from the server by id (used when no browser copy exists).
+  async function loadFromServer(id) {
     try {
-      const [acc, ins] = await Promise.all([
-        fetch(`/api/account?id=${id}`).then((r) => r.json()),
-        fetch(`/api/agent?id=${id}`).then((r) => r.json()),
-      ]);
+      const acc = await fetch(`/api/account?id=${id}`).then((r) => r.json());
       if (acc.error) {
         setStatus("signin");
         return;
       }
-      setAccount(acc.account);
-      setInsights(ins.insights);
-      setStatus("ready");
+      try {
+        localStorage.setItem("flowline_account", JSON.stringify(acc.account));
+      } catch {}
+      useAccount(acc.account);
     } catch {
       setStatus("error");
     }
@@ -45,14 +58,19 @@ export default function Dashboard() {
   async function signin(e) {
     e.preventDefault();
     setSigninErr("");
-    const res = await fetch(`/api/account?email=${encodeURIComponent(emailInput)}`);
-    if (!res.ok) {
-      setSigninErr("No account found for that email. Try setting one up.");
-      return;
+    try {
+      const res = await fetch(`/api/account?email=${encodeURIComponent(emailInput)}`);
+      if (!res.ok) {
+        setSigninErr("No account found for that email on this server. If you set it up in this browser, just reopen the dashboard; otherwise set one up.");
+        return;
+      }
+      const data = await res.json();
+      localStorage.setItem("flowline_account_id", data.account.id);
+      localStorage.setItem("flowline_account", JSON.stringify(data.account));
+      useAccount(data.account);
+    } catch {
+      setSigninErr("Couldn't reach the server. Try setting up your business.");
     }
-    const data = await res.json();
-    localStorage.setItem("flowline_account_id", data.account.id);
-    load(data.account.id);
   }
 
   if (status === "loading")
@@ -290,23 +308,31 @@ function WebsitePanel({ account, onUpdate }) {
 
   async function build() {
     setBuilding(true);
-    const res = await fetch("/api/account", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        id: account.id,
-        email: account.email,
-        business: { ...biz, hostedSite: true, needsWebsite: false },
-        economics: account.economics,
-        connections: {
-          ...account.connections,
-          website: { connected: true, type: "flowline-hosted" },
-        },
-        preferences: account.preferences,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) onUpdate(data.account);
+    const updated = {
+      ...account,
+      business: { ...biz, hostedSite: true, needsWebsite: false },
+      connections: {
+        ...account.connections,
+        website: { connected: true, type: "flowline-hosted" },
+      },
+    };
+    // Persist to the server best-effort, but the browser copy is authoritative
+    // so the site renders even on hosts without persistence.
+    try {
+      const res = await fetch("/api/account", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        Object.assign(updated, data.account);
+      }
+    } catch {}
+    try {
+      localStorage.setItem("flowline_account", JSON.stringify(updated));
+    } catch {}
+    onUpdate(updated);
     setBuilding(false);
   }
 
@@ -463,7 +489,7 @@ function ChatPanel({ account, insights }) {
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ id: account.id, message: msg }),
+        body: JSON.stringify({ id: account.id, account, message: msg }),
       });
       const data = await res.json();
       setMessages((m) => [...m, { role: "bot", text: data.reply || "…" }]);
