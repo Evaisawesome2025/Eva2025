@@ -1,0 +1,68 @@
+# FreshFlow Dryer Vent Cleaning — guardrails the agent must respect.
+# Replace REPLACE_ME / sample numbers with FreshFlow's real figures.
+# The agent uses these to decide what's safe and to project impact on spend changes.
+# For a local lead-gen trade business the key metric is COST PER BOOKED JOB, not ROAS.
+
+business:
+  name: "FreshFlow Dryer Vent Cleaning"
+  phone: "REPLACE_ME"               # the tracked main line shown in ads/site
+  service_area:
+    cities: ["REPLACE_ME"]          # e.g. ["Sioux Falls", "Brandon", "Harrisburg"]
+    radius_miles: 30                 # service radius from base
+  hours: "REPLACE_ME"               # used for ad scheduling + call-handling expectations
+
+# Economics — fill these in; everything downstream depends on them.
+economics:
+  avg_job_value: 165.00             # average ticket for a dryer vent cleaning ($)
+  avg_job_value_with_upsell: 320.00 # when air-duct / vent-guard upsell lands ($)
+  gross_margin_pct: 0.70            # rough margin per job after tech cost
+  lead_to_booking_rate: 0.45        # % of leads that become booked jobs (your close rate)
+  # Derived ceiling (for reference): max cost per booking should stay below
+  # avg_job_value * gross_margin_pct. Agent must flag spend that pushes above it.
+
+google_ads:                          # includes Search + Local Services Ads
+  account_id: "REPLACE_ME"
+  target_cost_per_lead: 35.00       # max acceptable cost per lead (call/form) ($)
+  target_cost_per_booking: 80.00    # max acceptable cost per booked job ($)
+  max_cpc: 12.00                    # hard ceiling per click ($) — home-services clicks run high
+  daily_budget_cap: 100.00          # agent may not propose budgets above this without flagging
+  local_services_ads:
+    enabled: true
+    target_cost_per_lead: 30.00     # LSA leads are pay-per-lead; dispute spam/out-of-area
+    dispute_bad_leads: true         # always recommend disputing invalid LSA leads
+
+meta_ads:
+  ad_account_id: "REPLACE_ME"
+  target_cost_per_lead: 25.00       # FB/IG lead-form or click-to-call leads ($)
+  target_cost_per_booking: 70.00
+  max_frequency: 2.5                # flag creative fatigue above this
+  daily_budget_cap: 60.00
+
+analytics:
+  ga4_property_id: "REPLACE_ME"
+  search_console_site: "https://REPLACE_ME"
+  call_tracking:
+    provider: "REPLACE_ME"          # e.g. CallRail / WhatConverts — source of lead truth
+    min_call_seconds_as_lead: 30    # calls shorter than this don't count as a real lead
+
+website:
+  platform: "wordpress"             # or: vercel-git | netlify-git | other
+  base_url: "https://REPLACE_ME"
+  booking_url: "https://REPLACE_ME" # online scheduler if any
+  primary_cta: "call"               # call | book-online | form — what we optimize toward
+
+local_presence:
+  google_business_profile_id: "REPLACE_ME"
+  review_target_rating: 4.8         # protect this; flag anything that drags it down
+  review_request_after_job: true    # always ask happy customers for a review (drafts only)
+
+seasonality:
+  # Months to lean in (raise budget) vs pull back. Dryer-vent demand is fire-safety driven.
+  peak_months: ["September", "October", "November"]   # pre-heating-season + fire awareness
+  secondary_months: ["March", "April"]                # spring cleaning
+  slow_months: ["June", "July"]                       # trim budget, keep LSA on
+
+approvals:
+  require_approval_for_spend: true   # keep true until you trust it
+  require_approval_for_customer_facing: true  # review replies, GBP edits, outbound messages
+  auto_execute_read_only: true
