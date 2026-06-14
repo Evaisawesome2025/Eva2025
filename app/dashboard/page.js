@@ -382,8 +382,9 @@ function WebsitePanel({ account, onUpdate }) {
             </a>
           </div>
           <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 10, marginBottom: 0 }}>
-            Built &amp; hosted by Flowline from your business info. Your agent keeps the
-            copy, services, and calls-to-action in sync.
+            Built &amp; hosted by Flowline, with Google Ads &amp; Meta conversion
+            tracking, click-to-call, and lead forms wired in — so every ad dollar is
+            measured against booked jobs.
           </p>
         </>
       ) : external ? (
@@ -432,8 +433,9 @@ function ApprovalButtons() {
 function ConnList({ connections = {} }) {
   const map = [
     { key: "googleAds", logo: "🔍", name: "Google Ads + LSA" },
+    { key: "searchConsole", logo: "📊", name: "Search Console" },
     { key: "meta", logo: "📱", name: "Meta Ads" },
-    { key: "website", logo: "🌐", name: "Website" },
+    { key: "website", logo: "🌐", name: "Website (hosted)" },
     { key: "callTracking", logo: "📞", name: "Call tracking" },
     { key: "googleBusiness", logo: "⭐", name: "Google Business Profile" },
   ];

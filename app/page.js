@@ -34,9 +34,9 @@ const features = [
 ];
 
 const steps = [
-  { h: "Tell it about your business", p: "Name, website, services, and the phone number you'll use to chat with it." },
-  { h: "Connect your accounts", p: "Google Ads, Meta, your website, and call tracking — read-only to start." },
-  { h: "It learns your funnel", p: "Spend → leads → bookings → revenue, per channel, against your targets." },
+  { h: "Tell it about your business", p: "Name, services, service area, and the phone number you'll use to chat with it." },
+  { h: "Connect your ads in one click", p: "Google Ads, Search Console, and Meta Ads — read-only to start, no setup headaches." },
+  { h: "We build your website", p: "A fast, hosted site generated from your info, pre-wired to sync with Google Ads and Meta." },
   { h: "You stay in control", p: "It drafts everything. Nothing spends money or faces a customer without your approval." },
 ];
 
