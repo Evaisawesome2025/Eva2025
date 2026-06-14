@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Doodle Jump",
-  description: "A Doodle Jump-style canvas game",
+  title: "Eva's Recipes",
+  description: "A simple recipe app that shows you how to make each recipe",
 };
 
 export default function RootLayout({ children }) {
