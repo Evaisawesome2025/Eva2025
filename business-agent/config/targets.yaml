@@ -7,8 +7,9 @@ business:
   name: "FreshFlow Dryer Vent Cleaning"
   phone: "REPLACE_ME"               # the tracked main line shown in ads/site
   service_area:
-    cities: ["REPLACE_ME"]          # e.g. ["Sioux Falls", "Brandon", "Harrisburg"]
-    radius_miles: 30                 # service radius from base
+    base: "Sioux Falls, SD"
+    cities: ["Sioux Falls"]          # primary city served
+    radius_miles: 25                 # service radius from Sioux Falls, SD
   hours: "REPLACE_ME"               # used for ad scheduling + call-handling expectations
 
 # Economics — fill these in; everything downstream depends on them.
