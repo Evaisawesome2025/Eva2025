@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { buildInsights } from "../../lib/insights.js";
+import { buildPulse } from "../../lib/pulse.js";
 
 const money = (n) => (n == null ? "—" : "$" + Number(n).toLocaleString());
 
@@ -165,6 +166,8 @@ export default function Dashboard() {
 
         <div className="dash-grid">
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <PulsePanel account={account} />
+
             <Panel title="The funnel, by channel">
               <table className="tbl">
                 <thead>
@@ -293,6 +296,51 @@ export default function Dashboard() {
               <ConnList connections={account.connections} />
             </Panel>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PulsePanel({ account }) {
+  const pulse = buildPulse(account);
+  return (
+    <div className="panel">
+      <div className="panel-head">
+        <h3>📬 This week&apos;s pulse</h3>
+        <span style={{ fontSize: 12.5, color: "var(--muted)" }}>
+          Week of {pulse.week} · auto-sent to your inbox
+        </span>
+      </div>
+      <div className="panel-body">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 10,
+          }}
+        >
+          <span className={"pill " + (pulse.onTarget ? "auto" : "approve")}>
+            {pulse.onTarget ? "ON TARGET" : "ACTION NEEDED"}
+          </span>
+          <span style={{ fontSize: 14, fontWeight: 600 }}>{pulse.headline}</span>
+        </div>
+        <p style={{ fontSize: 14, lineHeight: 1.55, color: "var(--ink)", margin: "0 0 12px" }}>
+          {pulse.bottomLine}
+        </p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <a className="btn btn-primary btn-sm" href={`/pulse/${account.id}`}>
+            Read the full pulse →
+          </a>
+          <a
+            className="btn btn-ghost btn-sm"
+            href={`/api/pulse?id=${account.id}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            ✉ View the email
+          </a>
         </div>
       </div>
     </div>
@@ -469,6 +517,19 @@ function ChatPanel({ account, insights }) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const logRef = useRef(null);
+  const askedRef = useRef(false);
+
+  // Deep-link from the Weekly Pulse quick-reply chips: /dashboard?ask=...
+  // sends the question straight into the chat, once.
+  useEffect(() => {
+    if (askedRef.current || typeof window === "undefined") return;
+    const ask = new URLSearchParams(window.location.search).get("ask");
+    if (ask) {
+      askedRef.current = true;
+      send(ask);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const suggestions = [
     "How did we do this month?",

@@ -20,6 +20,11 @@ can create an account and use it.
 - **Live dashboard** — the real funnel (spend → leads → bookings → revenue) per
   channel, cost per booked job vs. target, a leads inbox with speed-to-lead alerts,
   drafted review replies, and a prioritized weekly action list.
+- **Weekly Pulse** — an automated, plain-English read that lands in the owner's
+  inbox every week: what's working, what's leaking money, and the one or two moves
+  to make next — ending on the only number that matters (cost per booked job vs.
+  target). Previewable in-app at `/pulse/<id>` and as a real HTML email at
+  `/api/pulse?id=<id>`. No dashboards to dig through; no recurring charge.
 - **Chat with your agent** — ask about performance, leads you missed, wasted spend,
   budget, reviews, or your website. It answers from your real numbers.
 - **Two gates always on** — nothing that affects **spend** and nothing
@@ -42,12 +47,15 @@ Next.js (App Router).
 | --- | --- |
 | `app/page.js` | Marketing landing page |
 | `app/onboarding/page.js` | Multi-step signup wizard |
-| `app/dashboard/page.js` | Owner dashboard + agent chat |
+| `app/dashboard/page.js` | Owner dashboard + agent chat + Weekly Pulse preview |
+| `app/pulse/[id]/page.js` | The Weekly Pulse rendered in a mock inbox reader |
 | `app/site/[id]/page.js` | The live, hosted website generated for each business |
 | `app/api/account/route.js` | Create / fetch / update accounts |
 | `app/api/agent/route.js` | Funnel insights + chat replies |
+| `app/api/pulse/route.js` | The Weekly Pulse as JSON or a real HTML email |
 | `lib/store.js` | Account store (file-backed, in-memory fallback) |
 | `lib/insights.js` | Builds the funnel/leads/approvals from a business profile |
+| `lib/pulse.js` | Turns the funnel into the plain-English weekly pulse + email |
 | `lib/agent.js` | The agent's replies (rule-based; uses Claude when `ANTHROPIC_API_KEY` is set) |
 | `lib/website.js` | Generates the hosted-website content from a profile |
 
