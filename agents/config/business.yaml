@@ -1,0 +1,37 @@
+# Your business — every agent reads this. Fill it in once, keep it current.
+# This is the single source of truth for who you are, who your customer is, and how you sound.
+
+business:
+  name: "REPLACE_ME"
+  what_you_do: "REPLACE_ME"          # one plain sentence: what you sell and to whom
+  website: "https://REPLACE_ME"
+  service_area: "REPLACE_ME"         # cities/region, or "online / nationwide"
+  contact_email: "REPLACE_ME"        # the real sender identity used in outreach + replies
+  physical_address: "REPLACE_ME"     # required in cold email footers for CAN-SPAM compliance
+
+customer:
+  who: "REPLACE_ME"                  # who your ideal customer is (be specific)
+  pains: ["REPLACE_ME", "REPLACE_ME"]  # the problems they have that you solve
+  searches: ["REPLACE_ME"]           # phrases/questions they'd type or post when looking for help
+
+voice:
+  # How everything you publish should sound. Be concrete — this drives June, Sara, Nova, Maya.
+  tone: "REPLACE_ME"                 # e.g. "warm, plain-spoken, no jargon, lightly funny"
+  avoid: ["hype", "corporate filler", "over-claiming"]
+  signature: |
+    REPLACE_ME (your name)
+    REPLACE_ME (business name)
+    REPLACE_ME (phone / website)
+
+channels:                            # where June repurposes content
+  - "REPLACE_ME"                     # e.g. LinkedIn, Facebook, Instagram
+
+# What Bob watches. Add every URL whose breakage costs you money.
+monitor_urls:
+  - "https://REPLACE_ME"             # homepage
+  - "https://REPLACE_ME/contact"     # the money path: contact/booking page
+
+# What "good" means, for Leo's report. Use whatever fits your business.
+targets:
+  primary_metric: "REPLACE_ME"       # e.g. "cost per customer" or "new leads/week" or "revenue"
+  target_value: "REPLACE_ME"
