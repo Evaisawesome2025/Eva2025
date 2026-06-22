@@ -8,8 +8,11 @@ import {
   Bookmark,
   Settings,
   Radar,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const authEnabled = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -53,6 +56,17 @@ export function MainNav() {
                 </Link>
               );
             })}
+            {authEnabled && (
+              <form action="/auth/signout" method="post">
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <LogOut className="size-4" />
+                  Sign out
+                </button>
+              </form>
+            )}
           </nav>
         </div>
       </header>

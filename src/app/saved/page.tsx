@@ -10,7 +10,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { formatCurrency } from "@/lib/utils";
-import { SAMPLE_DEALS } from "@/lib/sample-data";
+import { listDeals } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
 
 const STATUS_LABELS: Record<string, string> = {
   watching: "Watching",
@@ -20,9 +22,8 @@ const STATUS_LABELS: Record<string, string> = {
   passed: "Passed",
 };
 
-export default function SavedDealsPage() {
-  // Saved deals are everything not yet passed on.
-  const deals = SAMPLE_DEALS;
+export default async function SavedDealsPage() {
+  const { deals } = await listDeals();
 
   return (
     <div className="space-y-6">
@@ -44,6 +45,12 @@ export default function SavedDealsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {deals.length === 0 && (
+            <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+              Nothing saved yet. Analyze a property and save it to start your
+              pipeline.
+            </div>
+          )}
           {[...deals]
             .sort((a, b) => b.flipScore - a.flipScore)
             .map((d) => (

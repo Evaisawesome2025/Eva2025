@@ -19,9 +19,33 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 | ------------------- | ---------------- | --------------------------------------------------- |
 | `/`                 | Dashboard        | Pipeline stats + recent analyses                    |
 | `/analyze`          | Analyze Property | Address search + deal inputs + live score           |
-| `/properties/[id]`  | Property Detail  | Underwrite, comparables, notes                      |
+| `/properties/[id]`  | Property Detail  | Underwrite, status, comparables, notes              |
 | `/saved`            | Saved Deals      | Tracked deals sorted by flip score                  |
 | `/settings`         | Settings         | Data-source/API status + scoring assumptions        |
+| `/login`            | Login            | Email/password auth (when Supabase is configured)   |
+
+## Authentication
+
+The app is gated by **Supabase Auth**. `middleware.ts` refreshes the session on
+every request and redirects unauthenticated users to `/login`. Row Level
+Security in the database ensures each user only ever sees their own rows.
+
+**Demo mode:** when the Supabase env vars are absent, the auth gate is bypassed
+and every page renders bundled **sample data** — so the deployed URL is useful
+immediately and becomes fully private + live the moment you add credentials.
+
+## API routes
+
+| Route                        | Method        | Purpose                                  |
+| ---------------------------- | ------------- | ---------------------------------------- |
+| `/api/analyze`               | POST          | Persist a property + analysis + saved deal (recomputed server-side) |
+| `/api/saved-deals/[id]`      | PATCH, DELETE | Update pipeline status / stop tracking   |
+| `/api/notes`                 | POST          | Add a note to a property                 |
+| `/api/comps`                 | POST          | Fetch + store comps from an approved provider |
+| `/api/geocode`               | GET           | Resolve a place_id/address (county, lat/lng) |
+| `/auth/callback`, `/auth/signout` | GET / POST | Auth session exchange + sign out      |
+
+Every write route authenticates the Supabase user and enforces ownership.
 
 ## Deal math (`src/services/dealScoringService.ts`)
 
@@ -36,11 +60,11 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 ## Getting started
 
 ```bash
-cd sioux-falls-flip-radar
 npm install
 cp .env.example .env        # fill in your keys
 npm run prisma:generate
 npm run db:push             # push schema to Supabase (needs DATABASE_URL)
+npm run db:seed             # seed the approved data-source registry
 npm run dev
 ```
 
@@ -51,6 +75,15 @@ editor. The equivalent Prisma schema is in
 
 The app renders with **sample data** out of the box so you can click through
 every page before connecting a database.
+
+## Testing
+
+```bash
+npm test          # run the vitest suite once
+npm run test:watch
+```
+
+Unit tests cover the flip math (`dealScoringService`) and formatting helpers.
 
 ## Data layer & compliance
 
