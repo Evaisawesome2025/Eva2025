@@ -51,6 +51,9 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
   appreciation / rent-growth.
 - **CSV / JSON export** — download your whole pipeline (`/api/export`).
 - **Dark mode** — system-aware, persisted, no flash.
+- **Pipeline map** (`/map`) — every deal plotted and color-coded by verdict
+  (Google Maps; degrades to a location list without a key).
+- **Command palette** — ⌘K / Ctrl+K to jump to any page or deal instantly.
 
 ## Authentication
 

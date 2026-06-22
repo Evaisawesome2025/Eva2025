@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { MainNav } from "@/components/main-nav";
+import { CommandPalette } from "@/components/command-palette";
 
 export const metadata: Metadata = {
   title: "Sioux Falls Flip Radar",
@@ -24,6 +25,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-muted/30 antialiased">
         <MainNav />
+        <CommandPalette />
         <main className="container py-6 pb-24 md:pb-10">{children}</main>
       </body>
     </html>

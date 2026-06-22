@@ -74,6 +74,8 @@ function mapSummary(deal: any): DealSummary {
     city: p.city ?? "",
     state: p.state ?? "",
     county: p.county ?? "",
+    latitude: p.latitude ?? null,
+    longitude: p.longitude ?? null,
     purchasePrice: Number(analysis.purchasePrice ?? 0),
     estimatedArv: Number(analysis.estimatedArv ?? 0),
     estimatedRepairs: Number(analysis.estimatedRepairs ?? 0),

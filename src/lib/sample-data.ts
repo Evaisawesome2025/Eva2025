@@ -11,6 +11,8 @@ export interface SampleDeal {
   city: string;
   state: string;
   county: string;
+  latitude: number | null;
+  longitude: number | null;
   purchasePrice: number;
   estimatedArv: number;
   estimatedRepairs: number;
@@ -29,6 +31,8 @@ export const SAMPLE_DEALS: SampleDeal[] = [
     city: "Sioux Falls",
     state: "SD",
     county: "Minnehaha County",
+    latitude: 43.539,
+    longitude: -96.7256,
     purchasePrice: 165000,
     estimatedArv: 295000,
     estimatedRepairs: 42000,
@@ -45,6 +49,8 @@ export const SAMPLE_DEALS: SampleDeal[] = [
     city: "Sioux Falls",
     state: "SD",
     county: "Minnehaha County",
+    latitude: 43.5499,
+    longitude: -96.6839,
     purchasePrice: 210000,
     estimatedArv: 285000,
     estimatedRepairs: 35000,
@@ -61,6 +67,8 @@ export const SAMPLE_DEALS: SampleDeal[] = [
     city: "Sioux Falls",
     state: "SD",
     county: "Minnehaha County",
+    latitude: 43.5596,
+    longitude: -96.7541,
     purchasePrice: 240000,
     estimatedArv: 280000,
     estimatedRepairs: 50000,
