@@ -8,6 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { formatCurrency } from "@/lib/utils";
 import { listDeals } from "@/lib/data";
@@ -27,11 +29,29 @@ export default async function SavedDealsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Saved Deals</h1>
-        <p className="text-muted-foreground">
-          Everything you&apos;re tracking, sorted by flip score.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Saved Deals</h1>
+          <p className="text-muted-foreground">
+            Everything you&apos;re tracking, sorted by flip score.
+          </p>
+        </div>
+        {deals.length > 0 && (
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <a href="/api/export?format=csv" download>
+                <Download />
+                CSV
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <a href="/api/export?format=json" download>
+                <Download />
+                JSON
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
 
       <Card>

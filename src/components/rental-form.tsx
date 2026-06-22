@@ -12,7 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { analyzeRental, type RentalInputs } from "@/services/rentalAnalysisService";
+import {
+  analyzeRental,
+  projectRental,
+  type RentalInputs,
+} from "@/services/rentalAnalysisService";
 import { formatCurrency, formatPercent, cn } from "@/lib/utils";
 import type { SelectedAddress } from "@/lib/types";
 
@@ -58,7 +62,14 @@ export function RentalForm() {
   const [, setAddress] = React.useState<SelectedAddress | null>(null);
   const [inputs, setInputs] = React.useState<RentalInputs>(DEFAULTS);
 
+  const [appreciationPct, setAppreciationPct] = React.useState(3);
+  const [rentGrowthPct, setRentGrowthPct] = React.useState(2);
+
   const r = React.useMemo(() => analyzeRental(inputs), [inputs]);
+  const projection = React.useMemo(
+    () => projectRental(inputs, { years: 5, appreciationPct, rentGrowthPct }),
+    [inputs, appreciationPct, rentGrowthPct]
+  );
 
   function update(key: keyof RentalInputs, raw: string) {
     const num = raw === "" ? 0 : Number(raw);
@@ -84,6 +95,7 @@ export function RentalForm() {
   ];
 
   return (
+    <div className="space-y-6">
     <div className="grid gap-6 lg:grid-cols-5">
       <div className="space-y-6 lg:col-span-3">
         <Card>
@@ -165,6 +177,92 @@ export function RentalForm() {
           </Card>
         </div>
       </div>
+    </div>
+
+    {/* 5-year wealth projection */}
+    <Card>
+      <CardHeader className="flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>5-Year Wealth Projection</CardTitle>
+          <CardDescription>
+            Appreciation + loan paydown + compounding cash flow.
+          </CardDescription>
+        </div>
+        <div className="flex gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="appr" className="text-xs">
+              Appreciation %
+            </Label>
+            <Input
+              id="appr"
+              type="number"
+              step={0.5}
+              value={appreciationPct}
+              onChange={(e) => setAppreciationPct(Number(e.target.value) || 0)}
+              className="w-24"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="rentg" className="text-xs">
+              Rent Growth %
+            </Label>
+            <Input
+              id="rentg"
+              type="number"
+              step={0.5}
+              value={rentGrowthPct}
+              onChange={(e) => setRentGrowthPct(Number(e.target.value) || 0)}
+              className="w-24"
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-muted-foreground">
+              <th className="py-2 pr-4 font-medium">Year</th>
+              <th className="py-2 pr-4 font-medium">Property Value</th>
+              <th className="py-2 pr-4 font-medium">Loan Balance</th>
+              <th className="py-2 pr-4 font-medium">Equity</th>
+              <th className="py-2 pr-4 font-medium">Cash Flow</th>
+              <th className="py-2 font-medium">Total Return</th>
+            </tr>
+          </thead>
+          <tbody>
+            {projection.map((row) => (
+              <tr key={row.year} className="border-b last:border-0">
+                <td className="py-2 pr-4 font-medium">Y{row.year}</td>
+                <td className="py-2 pr-4 tabular-nums">
+                  {formatCurrency(row.propertyValue)}
+                </td>
+                <td className="py-2 pr-4 tabular-nums">
+                  {formatCurrency(row.loanBalance)}
+                </td>
+                <td className="py-2 pr-4 font-medium tabular-nums">
+                  {formatCurrency(row.equity)}
+                </td>
+                <td
+                  className={cn(
+                    "py-2 pr-4 tabular-nums",
+                    row.annualCashFlow >= 0 ? "text-green-600" : "text-red-600"
+                  )}
+                >
+                  {formatCurrency(row.annualCashFlow)}
+                </td>
+                <td className="py-2 font-semibold tabular-nums">
+                  {formatCurrency(row.totalReturn)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Total return = equity gained over your initial cash invested +
+          cumulative cash flow.
+        </p>
+      </CardContent>
+    </Card>
     </div>
   );
 }

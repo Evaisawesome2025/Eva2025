@@ -18,6 +18,7 @@ import { RepairEstimator } from "@/components/repair-estimator";
 import { FinancingCalculator } from "@/components/financing-calculator";
 import { SensitivityTable } from "@/components/sensitivity-table";
 import { OfferScenarios } from "@/components/offer-scenarios";
+import { dealEconomics } from "@/lib/calculators";
 import { analyzeDeal } from "@/services/dealScoringService";
 import {
   loadLocalConfig,
@@ -81,6 +82,7 @@ export function AnalyzeForm() {
     () => analyzeDeal(inputs, config),
     [inputs, config]
   );
+  const econ = React.useMemo(() => dealEconomics(inputs), [inputs]);
 
   function update(key: keyof AnalysisInputs, raw: string) {
     const num = raw === "" ? 0 : Number(raw);
@@ -221,6 +223,11 @@ export function AnalyzeForm() {
               <ResultRow
                 label="Cash-on-Cash ROI"
                 value={formatPercent(result.roiPercent)}
+              />
+              <ResultRow
+                label="Total Project Cost"
+                hint="Purchase + repairs + holding + closing"
+                value={formatCurrency(econ.totalProjectCost)}
               />
             </CardContent>
           </Card>

@@ -45,6 +45,24 @@ export interface RentalResult {
   totalCashInvested: number;
 }
 
+/** Remaining loan balance after a number of monthly payments. */
+export function remainingBalance(
+  principal: number,
+  annualRatePct: number,
+  termYears: number,
+  monthsPaid: number
+): number {
+  if (principal <= 0) return 0;
+  const r = annualRatePct / 100 / 12;
+  const n = termYears * 12;
+  const k = Math.min(monthsPaid, n);
+  if (r === 0) return Math.max(0, principal * (1 - k / n));
+  const balance =
+    (principal * (Math.pow(1 + r, n) - Math.pow(1 + r, k))) /
+    (Math.pow(1 + r, n) - 1);
+  return Math.max(0, balance);
+}
+
 /** Standard amortized monthly payment. */
 export function monthlyMortgagePayment(
   principal: number,
@@ -56,6 +74,97 @@ export function monthlyMortgagePayment(
   const n = termYears * 12;
   if (r === 0) return n > 0 ? principal / n : 0;
   return (principal * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+}
+
+export interface ProjectionAssumptions {
+  years: number;
+  /** Annual property appreciation (%). */
+  appreciationPct: number;
+  /** Annual rent growth (%). */
+  rentGrowthPct: number;
+}
+
+export interface ProjectionYear {
+  year: number;
+  propertyValue: number;
+  loanBalance: number;
+  equity: number;
+  annualCashFlow: number;
+  cumulativeCashFlow: number;
+  /** Equity gain + cumulative cash flow vs. the initial cash invested. */
+  totalReturn: number;
+}
+
+/**
+ * Multi-year wealth projection: appreciation + loan paydown build equity, and
+ * cash flow (growing with rent) compounds on top.
+ */
+export function projectRental(
+  inputs: RentalInputs,
+  assumptions: ProjectionAssumptions = {
+    years: 5,
+    appreciationPct: 3,
+    rentGrowthPct: 2,
+  }
+): ProjectionYear[] {
+  const startingValue =
+    (inputs.purchasePrice || 0) + (inputs.estimatedRepairs || 0);
+  const downPayment =
+    (inputs.purchasePrice || 0) * ((inputs.downPaymentPct || 0) / 100);
+  const loanAmount = (inputs.purchasePrice || 0) - downPayment;
+  const cashInvested =
+    downPayment + (inputs.estimatedRepairs || 0) + (inputs.closingCosts || 0);
+
+  const fixedMonthly =
+    (inputs.monthlyTaxes || 0) +
+    (inputs.monthlyInsurance || 0) +
+    (inputs.monthlyHoa || 0);
+  const variablePct =
+    ((inputs.vacancyPct || 0) +
+      (inputs.managementPct || 0) +
+      (inputs.maintenancePct || 0) +
+      (inputs.capexPct || 0)) /
+    100;
+  const monthlyDebt = monthlyMortgagePayment(
+    loanAmount,
+    inputs.loanRatePct || 0,
+    inputs.loanTermYears || 0
+  );
+
+  const out: ProjectionYear[] = [];
+  let cumulative = 0;
+
+  for (let y = 1; y <= assumptions.years; y++) {
+    const value =
+      startingValue * Math.pow(1 + assumptions.appreciationPct / 100, y);
+    const balance = remainingBalance(
+      loanAmount,
+      inputs.loanRatePct || 0,
+      inputs.loanTermYears || 0,
+      y * 12
+    );
+    const equity = value - balance;
+
+    const rent =
+      (inputs.monthlyRent || 0) *
+      Math.pow(1 + assumptions.rentGrowthPct / 100, y - 1);
+    const monthlyCashFlow =
+      rent - rent * variablePct - fixedMonthly - monthlyDebt;
+    const annualCashFlow = monthlyCashFlow * 12;
+    cumulative += annualCashFlow;
+
+    out.push({
+      year: y,
+      propertyValue: Math.round(value),
+      loanBalance: Math.round(balance),
+      equity: Math.round(equity),
+      annualCashFlow: Math.round(annualCashFlow),
+      cumulativeCashFlow: Math.round(cumulative),
+      totalReturn: Math.round(equity - cashInvested + cumulative),
+    });
+  }
+
+  return out;
 }
 
 export function analyzeRental(inputs: RentalInputs): RentalResult {

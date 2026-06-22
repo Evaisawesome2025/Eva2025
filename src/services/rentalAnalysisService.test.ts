@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   analyzeRental,
   monthlyMortgagePayment,
+  remainingBalance,
+  projectRental,
   type RentalInputs,
 } from "./rentalAnalysisService";
 
@@ -72,5 +74,35 @@ describe("analyzeRental", () => {
     expect(Number.isFinite(r.capRatePct)).toBe(true);
     expect(Number.isFinite(r.cashOnCashPct)).toBe(true);
     expect(r.dscr).toBe(0);
+  });
+
+  describe("remainingBalance", () => {
+    it("is below principal after a year of payments", () => {
+      const bal = remainingBalance(200000, 7, 30, 12);
+      expect(bal).toBeLessThan(200000);
+      expect(bal).toBeGreaterThan(190000);
+    });
+    it("is zero at the end of the term", () => {
+      expect(remainingBalance(200000, 7, 30, 360)).toBe(0);
+    });
+  });
+
+  describe("projectRental", () => {
+    it("produces a row per year with growing equity", () => {
+      const proj = projectRental(inputs, {
+        years: 5,
+        appreciationPct: 3,
+        rentGrowthPct: 2,
+      });
+      expect(proj).toHaveLength(5);
+      expect(proj[4].equity).toBeGreaterThan(proj[0].equity);
+      expect(proj[4].propertyValue).toBeGreaterThan(proj[0].propertyValue);
+      // Loan balance paid down over time.
+      expect(proj[4].loanBalance).toBeLessThan(proj[0].loanBalance);
+    });
+    it("accumulates cash flow", () => {
+      const proj = projectRental(inputs);
+      expect(proj[1].cumulativeCashFlow).not.toBe(proj[0].cumulativeCashFlow);
+    });
   });
 });

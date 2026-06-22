@@ -13,6 +13,7 @@ import {
   GitCompare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const authEnabled = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
@@ -46,6 +47,7 @@ export function MainNav() {
             <span className="hidden sm:inline">Sioux Falls Flip Radar</span>
             <span className="sm:hidden">Flip Radar</span>
           </Link>
+          <div className="flex items-center gap-1">
           <nav className="hidden gap-1 md:flex">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -77,6 +79,8 @@ export function MainNav() {
               </form>
             )}
           </nav>
+          <ThemeToggle />
+          </div>
         </div>
       </header>
 

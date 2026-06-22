@@ -46,6 +46,11 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
   signed in. The Analyze page scores live against your assumptions.
 - **Printable deal sheet** — a clean one-page PDF (`/properties/[id]/print`)
   with the headline numbers, underwrite, and notes.
+- **5-year wealth projection** (rentals) — appreciation + loan paydown +
+  compounding cash flow into equity and total return, with tunable
+  appreciation / rent-growth.
+- **CSV / JSON export** — download your whole pipeline (`/api/export`).
+- **Dark mode** — system-aware, persisted, no flash.
 
 ## Authentication
 
