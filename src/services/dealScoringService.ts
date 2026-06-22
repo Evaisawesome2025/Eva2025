@@ -1,21 +1,30 @@
 import type { AnalysisInputs, AnalysisResult, Verdict } from "@/lib/types";
+import {
+  DEFAULT_SCORING_CONFIG,
+  type ScoringConfig,
+} from "@/lib/scoring-config";
 
 /**
  * dealScoringService
  * ------------------
  * Pure, dependency-free flip math. No network, no DB — easy to unit test and
- * reuse on both client and server.
+ * reuse on both client and server. Every function accepts an optional
+ * ScoringConfig so investors can tune the rules to their buy box.
  */
 
-/** The classic "70% rule" multiplier used for the max offer. */
-export const ARV_RULE_MULTIPLIER = 0.7;
+/** The classic "70% rule" multiplier used for the max offer (default). */
+export const ARV_RULE_MULTIPLIER = DEFAULT_SCORING_CONFIG.arvMultiplier;
 
 /**
- * Max allowable offer using the 70% rule:
- *   maxOffer = ARV * 0.70 - repairs
+ * Max allowable offer using the ARV rule:
+ *   maxOffer = ARV * multiplier - repairs   (multiplier defaults to 0.70)
  */
-export function calculateMaxOffer(arv: number, repairs: number): number {
-  return round(arv * ARV_RULE_MULTIPLIER - repairs);
+export function calculateMaxOffer(
+  arv: number,
+  repairs: number,
+  multiplier: number = DEFAULT_SCORING_CONFIG.arvMultiplier
+): number {
+  return round(arv * multiplier - repairs);
 }
 
 /**
@@ -64,23 +73,29 @@ export function calculateTotalInvested(inputs: AnalysisInputs): number {
  * Flip score from 0–100. Blends three signals an investor cares about:
  *   1. ROI on cash invested (most weight)
  *   2. Profit margin vs. ARV
- *   3. How far the purchase price sits below the 70%-rule max offer (the "cushion")
+ *   3. How far the purchase price sits below the max offer (the "cushion")
  */
-export function calculateFlipScore(inputs: AnalysisInputs): number {
+export function calculateFlipScore(
+  inputs: AnalysisInputs,
+  config: ScoringConfig = DEFAULT_SCORING_CONFIG
+): number {
   const profit = calculateEstimatedProfit(inputs);
   const invested = calculateTotalInvested(inputs);
-  const maxOffer = calculateMaxOffer(inputs.estimatedArv, inputs.estimatedRepairs);
+  const maxOffer = calculateMaxOffer(
+    inputs.estimatedArv,
+    inputs.estimatedRepairs,
+    config.arvMultiplier
+  );
 
-  // 1. ROI component — 30%+ cash-on-cash maxes this out.
+  // 1. ROI component — hitting the target cash-on-cash maxes this out.
   const roi = invested > 0 ? profit / invested : 0;
-  const roiScore = clamp01(roi / 0.3) * 45;
+  const roiScore = clamp01(roi / (config.targetRoiPct / 100)) * 45;
 
-  // 2. Margin component — 25%+ profit-to-ARV maxes this out.
+  // 2. Margin component — hitting the target profit-to-ARV maxes this out.
   const margin = inputs.estimatedArv > 0 ? profit / inputs.estimatedArv : 0;
-  const marginScore = clamp01(margin / 0.25) * 35;
+  const marginScore = clamp01(margin / (config.targetMarginPct / 100)) * 35;
 
   // 3. Cushion component — buying at/under the max offer is ideal.
-  //    cushion = how far below max offer you're buying, relative to max offer.
   const cushion =
     maxOffer > 0 ? (maxOffer - inputs.purchasePrice) / maxOffer : 0;
   const cushionScore = clamp01((cushion + 0.05) / 0.2) * 20;
@@ -90,20 +105,30 @@ export function calculateFlipScore(inputs: AnalysisInputs): number {
 }
 
 /** Green / yellow / red verdict derived from the flip score. */
-export function scoreToVerdict(score: number): Verdict {
-  if (score >= 70) return "green";
-  if (score >= 45) return "yellow";
+export function scoreToVerdict(
+  score: number,
+  config: ScoringConfig = DEFAULT_SCORING_CONFIG
+): Verdict {
+  if (score >= config.greenThreshold) return "green";
+  if (score >= config.yellowThreshold) return "yellow";
   return "red";
 }
 
 /** Run the full underwrite and return every computed field. */
-export function analyzeDeal(inputs: AnalysisInputs): AnalysisResult {
-  const maxOffer = calculateMaxOffer(inputs.estimatedArv, inputs.estimatedRepairs);
+export function analyzeDeal(
+  inputs: AnalysisInputs,
+  config: ScoringConfig = DEFAULT_SCORING_CONFIG
+): AnalysisResult {
+  const maxOffer = calculateMaxOffer(
+    inputs.estimatedArv,
+    inputs.estimatedRepairs,
+    config.arvMultiplier
+  );
   const estimatedProfit = calculateEstimatedProfit(inputs);
   const invested = calculateTotalInvested(inputs);
   const roiPercent = invested > 0 ? (estimatedProfit / invested) * 100 : 0;
-  const flipScore = calculateFlipScore(inputs);
-  const verdict = scoreToVerdict(flipScore);
+  const flipScore = calculateFlipScore(inputs, config);
+  const verdict = scoreToVerdict(flipScore, config);
 
   return {
     maxOffer,

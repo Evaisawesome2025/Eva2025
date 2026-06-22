@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin, FileText } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -9,18 +9,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NotesPanel } from "@/components/notes-panel";
+import { CompsPanel } from "@/components/comps-panel";
+import { StatusSelect } from "@/components/status-select";
 import { formatCurrency, cn } from "@/lib/utils";
-import { getSampleDeal } from "@/lib/sample-data";
+import { getDealDetail } from "@/lib/data";
 
-export default function PropertyDetailPage({
+export const dynamic = "force-dynamic";
+
+export default async function PropertyDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const deal = getSampleDeal(params.id);
+  const deal = await getDealDetail(params.id);
   if (!deal) notFound();
 
   const verdictColor =
@@ -40,12 +44,20 @@ export default function PropertyDetailPage({
 
   return (
     <div className="space-y-6">
-      <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link href="/saved">
-          <ArrowLeft />
-          Back
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
+          <Link href="/saved">
+            <ArrowLeft />
+            Back
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/properties/${deal.id}/print`}>
+            <FileText />
+            Deal Sheet
+          </Link>
+        </Button>
+      </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -54,7 +66,9 @@ export default function PropertyDetailPage({
             {deal.formattedAddress}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            {deal.city}, {deal.state} · {deal.county}
+            {deal.city}
+            {deal.city && deal.state ? ", " : ""}
+            {deal.state} · {deal.county}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -74,13 +88,12 @@ export default function PropertyDetailPage({
 
         <TabsContent value="analysis">
           <Card>
-            <CardHeader>
-              <CardTitle>Flip Underwrite</CardTitle>
-              <CardDescription>
-                Status: <Badge variant="outline" className="capitalize">
-                  {deal.status.replace("_", " ")}
-                </Badge>
-              </CardDescription>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Flip Underwrite</CardTitle>
+                <CardDescription>Pipeline status</CardDescription>
+              </div>
+              <StatusSelect dealId={deal.id} current={deal.status} />
             </CardHeader>
             <CardContent className="divide-y p-0">
               {financials.map((f) => (
@@ -114,10 +127,11 @@ export default function PropertyDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                No comparables yet. Add an approved data-source API key in
-                Settings to populate comps.
-              </div>
+              <CompsPanel
+                propertyId={deal.propertyId}
+                address={deal.formattedAddress}
+                initialComps={deal.comps}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -131,9 +145,10 @@ export default function PropertyDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                No notes yet.
-              </div>
+              <NotesPanel
+                propertyId={deal.propertyId}
+                initialNotes={deal.notes}
+              />
             </CardContent>
           </Card>
         </TabsContent>

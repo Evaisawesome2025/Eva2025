@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { MainNav } from "@/components/main-nav";
+import { CommandPalette } from "@/components/command-palette";
 
 export const metadata: Metadata = {
   title: "Sioux Falls Flip Radar",
@@ -13,9 +14,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply the saved theme before paint to avoid a flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('flip-radar.theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-muted/30 antialiased">
         <MainNav />
+        <CommandPalette />
         <main className="container py-6 pb-24 md:pb-10">{children}</main>
       </body>
     </html>

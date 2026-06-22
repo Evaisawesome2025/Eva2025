@@ -8,9 +8,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { formatCurrency } from "@/lib/utils";
-import { SAMPLE_DEALS } from "@/lib/sample-data";
+import { listDeals } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
 
 const STATUS_LABELS: Record<string, string> = {
   watching: "Watching",
@@ -20,17 +24,34 @@ const STATUS_LABELS: Record<string, string> = {
   passed: "Passed",
 };
 
-export default function SavedDealsPage() {
-  // Saved deals are everything not yet passed on.
-  const deals = SAMPLE_DEALS;
+export default async function SavedDealsPage() {
+  const { deals } = await listDeals();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Saved Deals</h1>
-        <p className="text-muted-foreground">
-          Everything you&apos;re tracking, sorted by flip score.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Saved Deals</h1>
+          <p className="text-muted-foreground">
+            Everything you&apos;re tracking, sorted by flip score.
+          </p>
+        </div>
+        {deals.length > 0 && (
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <a href="/api/export?format=csv" download>
+                <Download />
+                CSV
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <a href="/api/export?format=json" download>
+                <Download />
+                JSON
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
 
       <Card>
@@ -44,6 +65,12 @@ export default function SavedDealsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {deals.length === 0 && (
+            <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+              Nothing saved yet. Analyze a property and save it to start your
+              pipeline.
+            </div>
+          )}
           {[...deals]
             .sort((a, b) => b.flipScore - a.flipScore)
             .map((d) => (

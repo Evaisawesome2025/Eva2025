@@ -7,6 +7,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScoringSettingsForm } from "@/components/scoring-settings-form";
+import { isSupabaseConfigured } from "@/lib/env";
+
+const authEnabled = isSupabaseConfigured;
 
 interface SourceRow {
   key: string;
@@ -125,23 +129,11 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Scoring Assumptions</CardTitle>
           <CardDescription>
-            Defaults used by the flip score. Edit{" "}
-            <code className="text-xs">dealScoringService.ts</code> to tune.
+            Tune the flip score to your buy box. Used live on the Analyze page.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
-          <div className="rounded-md border p-3">
-            <div className="text-muted-foreground">ARV rule multiplier</div>
-            <div className="text-lg font-semibold">70%</div>
-          </div>
-          <div className="rounded-md border p-3">
-            <div className="text-muted-foreground">Target cash-on-cash ROI</div>
-            <div className="text-lg font-semibold">30%</div>
-          </div>
-          <div className="rounded-md border p-3">
-            <div className="text-muted-foreground">Green verdict threshold</div>
-            <div className="text-lg font-semibold">Score ≥ 70</div>
-          </div>
+        <CardContent>
+          <ScoringSettingsForm authEnabled={authEnabled} />
         </CardContent>
       </Card>
     </div>

@@ -10,11 +10,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { Badge } from "@/components/ui/badge";
+import { DealCharts } from "@/components/deal-charts";
 import { formatCurrency } from "@/lib/utils";
-import { SAMPLE_DEALS } from "@/lib/sample-data";
+import { listDeals } from "@/lib/data";
 
-export default function DashboardPage() {
-  const deals = SAMPLE_DEALS;
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const { deals, isSample } = await listDeals();
   const greenCount = deals.filter((d) => d.verdict === "green").length;
   const avgScore =
     deals.length > 0
@@ -71,14 +74,27 @@ export default function DashboardPage() {
         })}
       </div>
 
+      {deals.length > 0 && <DealCharts deals={deals} />}
+
       <Card>
         <CardHeader>
           <CardTitle>Recent Analyses</CardTitle>
           <CardDescription>
-            Sample data — connect Supabase to see your saved deals here.
+            {isSample
+              ? "Sample data — sign in with Supabase connected to see your saved deals."
+              : "Your most recently updated deals."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {deals.length === 0 && (
+            <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+              No deals yet. Head to{" "}
+              <Link href="/analyze" className="text-primary underline">
+                Analyze a Property
+              </Link>{" "}
+              to underwrite your first flip.
+            </div>
+          )}
           {deals.map((d) => (
             <Link
               key={d.id}

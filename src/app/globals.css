@@ -53,3 +53,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print: hide app chrome and any element marked no-print. */
+@media print {
+  header,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  body {
+    background: #fff !important;
+  }
+}
