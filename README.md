@@ -1,85 +1,70 @@
-# Flowline
+# Sioux Falls Flip Radar
 
-**An AI marketing manager for local service businesses.** A small business owner
-signs up, tells Flowline about their business, connects their Google Ads, Meta,
-website, and lead sources, and gets one agent they can just talk to — measured in
-booked jobs and dollars, not clicks.
+A private real estate investing dashboard for analyzing house flips in the
+Sioux Falls, SD market. Enter an address, plug in your numbers, and get an
+instant **max offer**, **estimated profit**, and a **0–100 flip score** with a
+green / yellow / red verdict — built for fast decisions on mobile or desktop.
 
-Built first for **FreshFlow Dryer Vent Cleaning**, designed so any small business
-can create an account and use it.
+## Stack
 
-## What it does
+- **Next.js 14** (App Router) + **TypeScript**
+- **Tailwind CSS** + **shadcn/ui** components
+- **Supabase** (Postgres + Auth + RLS)
+- **Prisma** ORM
+- **Google Places** address autocomplete
 
-- **Onboarding wizard** — business name, website, the phone number you'll text to
-  chat with your agent, the services you provide, your service area, and your unit
-  economics (average job value, close rate, target cost per booked job).
-- **Connect your accounts** — Google Ads + Local Services, Meta, your website, call
-  tracking, and Google Business Profile. Read-only to start.
-- **Builds your website** — no site? Flowline generates and hosts a professional
-  landing page from your services and service area, live at `/site/<id>`.
-- **Live dashboard** — the real funnel (spend → leads → bookings → revenue) per
-  channel, cost per booked job vs. target, a leads inbox with speed-to-lead alerts,
-  drafted review replies, and a prioritized weekly action list.
-- **Chat with your agent** — ask about performance, leads you missed, wasted spend,
-  budget, reviews, or your website. It answers from your real numbers.
-- **Two gates always on** — nothing that affects **spend** and nothing
-  **customer-facing** goes live without the owner's explicit approval. The agent
-  drafts; you approve.
+## Pages
 
-## How small-business owners benefit
+| Route               | Page             | What it does                                        |
+| ------------------- | ---------------- | --------------------------------------------------- |
+| `/`                 | Dashboard        | Pipeline stats + recent analyses                    |
+| `/analyze`          | Analyze Property | Address search + deal inputs + live score           |
+| `/properties/[id]`  | Property Detail  | Underwrite, comparables, notes                      |
+| `/saved`            | Saved Deals      | Tracked deals sorted by flip score                  |
+| `/settings`         | Settings         | Data-source/API status + scoring assumptions        |
 
-- One place instead of five dashboards and an agency retainer.
-- Decisions framed the way an owner thinks: cost per booked job vs. profit per job.
-- Catches the most expensive problem in the trades — leads that never got called back.
-- Gets a real website in seconds if they don't have one, kept in sync with what converts.
-- Stays in control: the agent earns trust on read-only work before it touches spend.
+## Deal math (`src/services/dealScoringService.ts`)
 
-## Architecture
+- **Max offer** = `ARV × 0.70 − repairs` (the 70% rule)
+- **Estimated profit** = `ARV − purchase − repairs − holding − selling − closing`
+  - holding = `financingCost (monthly) × holdingMonths`
+  - selling = `ARV × sellingCostPct / 100`
+- **Flip score (0–100)** blends cash-on-cash ROI (45%), profit-to-ARV margin
+  (35%), and purchase cushion vs. the max offer (20%)
+- **Verdict**: score ≥ 70 green · ≥ 45 yellow · else red
 
-Next.js (App Router).
-
-| Path | Purpose |
-| --- | --- |
-| `app/page.js` | Marketing landing page |
-| `app/onboarding/page.js` | Multi-step signup wizard |
-| `app/dashboard/page.js` | Owner dashboard + agent chat |
-| `app/site/[id]/page.js` | The live, hosted website generated for each business |
-| `app/api/account/route.js` | Create / fetch / update accounts |
-| `app/api/agent/route.js` | Funnel insights + chat replies |
-| `lib/store.js` | Account store (file-backed, in-memory fallback) |
-| `lib/insights.js` | Builds the funnel/leads/approvals from a business profile |
-| `lib/agent.js` | The agent's replies (rule-based; uses Claude when `ANTHROPIC_API_KEY` is set) |
-| `lib/website.js` | Generates the hosted-website content from a profile |
-
-The `business-agent/` directory holds the matching Claude Code agent definition
-(skills, operating rules, spend/reputation gates) that this product is the front
-end for.
-
-## Run locally
+## Getting started
 
 ```bash
+cd sioux-falls-flip-radar
 npm install
-npm run dev      # http://localhost:3000
+cp .env.example .env        # fill in your keys
+npm run prisma:generate
+npm run db:push             # push schema to Supabase (needs DATABASE_URL)
+npm run dev
 ```
 
-Production build:
+The Supabase SQL (tables, RLS policies, triggers, seed data) lives in
+[`supabase/schema.sql`](./supabase/schema.sql) — run it in the Supabase SQL
+editor. The equivalent Prisma schema is in
+[`prisma/schema.prisma`](./prisma/schema.prisma).
 
-```bash
-npm run build && npm start
-```
+The app renders with **sample data** out of the box so you can click through
+every page before connecting a database.
 
-### Configuration
+## Data layer & compliance
 
-- `ANTHROPIC_API_KEY` — optional. When set, the chat agent calls Claude grounded in
-  the business profile + live funnel under the spend/reputation rules. Without it,
-  the agent uses a deterministic responder that reads the same data.
-- `DATA_DIR` — where the account store writes (defaults to `.data/`). On read-only
-  hosts it falls back to in-memory.
+The data layer is built to plug in **approved** providers only. Placeholder
+service wrappers (env-var driven) are ready in `src/services/`:
 
-## What's real vs. demo
+- `googleGeocodingService` — Places/Geocoding (county, lat/lng)
+- `rentcastService` — RentCast AVM + comps
+- `attomService` — ATTOM property/sales records
+- `countyDataService` — Minnehaha/Lincoln County GIS open data
+- `dealScoringService` — the flip math (live, no key needed)
 
-Real: onboarding, account persistence, the dashboard, the chat agent, and the
-generated/hosted business websites. The ad-platform connections use placeholder
-OAuth and the funnel numbers are synthesized per account so the dashboard is
-populated — swap `lib/insights.js` for live Google Ads / Meta / GA4 / call-tracking
-pulls and the UI is unchanged.
+> This app does **not** scrape Zillow, Realtor.com, Redfin, Facebook
+> Marketplace, or any site that disallows automated access. Add only
+> ToS-compliant APIs and licensed MLS/IDX feeds.
+
+All API keys are read from environment variables — see `.env.example`.
