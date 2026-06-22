@@ -1,0 +1,189 @@
+// Sioux Falls Flip Radar — Prisma schema
+// Mirrors the Supabase SQL schema in /supabase/schema.sql.
+// Run `npm run db:push` (or prisma migrate) to sync.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// Mirrors Supabase auth.users (id matches auth.uid()). Profile/settings live here.
+// ---------------------------------------------------------------------------
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  fullName  String?  @map("full_name")
+  // Per-user scoring + cost assumptions, stored as JSON for flexibility.
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  properties Property[]
+  analyses   PropertyAnalysis[]
+  savedDeals SavedDeal[]
+  notes      Note[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Properties — one row per physical address.
+// ---------------------------------------------------------------------------
+model Property {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  formattedAddress String   @map("formatted_address")
+  placeId          String?  @map("place_id")
+  latitude         Float?
+  longitude        Float?
+  street           String?
+  city             String?
+  state            String?
+  zip              String?
+  county           String?
+  // Optional physical attributes (filled later from approved data sources).
+  beds             Int?
+  baths            Float?
+  sqft             Int?
+  lotSize          Int?     @map("lot_size")
+  yearBuilt        Int?     @map("year_built")
+  propertyType     String?  @map("property_type")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses    PropertyAnalysis[]
+  comparables ComparableSale[]
+  savedDeals  SavedDeal[]
+  notes       Note[]
+
+  @@unique([userId, placeId])
+  @@index([userId])
+  @@index([city, state])
+  @@map("properties")
+}
+
+// ---------------------------------------------------------------------------
+// Property analysis — a flip underwrite snapshot for a property.
+// ---------------------------------------------------------------------------
+model PropertyAnalysis {
+  id                   String   @id @default(uuid()) @db.Uuid
+  propertyId           String   @map("property_id") @db.Uuid
+  userId               String   @map("user_id") @db.Uuid
+
+  // Inputs
+  purchasePrice        Float?   @map("purchase_price")
+  estimatedArv         Float?   @map("estimated_arv")
+  estimatedRepairs     Float?   @map("estimated_repairs")
+  holdingMonths        Int?     @map("holding_months")
+  financingCost        Float?   @map("financing_cost")
+  sellingCostPct       Float?   @map("selling_cost_pct")
+  closingCostEstimate  Float?   @map("closing_cost_estimate")
+
+  // Outputs (denormalized so historical analyses stay stable)
+  maxOffer             Float?   @map("max_offer")
+  estimatedProfit      Float?   @map("estimated_profit")
+  flipScore            Int?     @map("flip_score")
+  verdict              String?  // "green" | "yellow" | "red"
+
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([userId])
+  @@map("property_analysis")
+}
+
+// ---------------------------------------------------------------------------
+// Comparable sales — comps sourced from approved providers only.
+// ---------------------------------------------------------------------------
+model ComparableSale {
+  id               String    @id @default(uuid()) @db.Uuid
+  propertyId       String    @map("property_id") @db.Uuid
+  formattedAddress String?   @map("formatted_address")
+  distanceMiles    Float?    @map("distance_miles")
+  salePrice        Float?    @map("sale_price")
+  saleDate         DateTime? @map("sale_date")
+  beds             Int?
+  baths            Float?
+  sqft             Int?
+  pricePerSqft     Float?    @map("price_per_sqft")
+  // Where this comp came from (e.g. "rentcast", "attom", "county_gis", "mls_idx").
+  source           String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("comparable_sales")
+}
+
+// ---------------------------------------------------------------------------
+// Saved deals — properties the user has flagged to track.
+// ---------------------------------------------------------------------------
+model SavedDeal {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  propertyId String   @map("property_id") @db.Uuid
+  analysisId String?  @map("analysis_id") @db.Uuid
+  // "watching" | "pursuing" | "offer_made" | "under_contract" | "passed"
+  status     String   @default("watching")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@map("saved_deals")
+}
+
+// ---------------------------------------------------------------------------
+// Notes — free-form notes attached to a property.
+// ---------------------------------------------------------------------------
+model Note {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  propertyId String   @map("property_id") @db.Uuid
+  body       String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("notes")
+}
+
+// ---------------------------------------------------------------------------
+// Data sources — registry of approved integrations + their status.
+// ---------------------------------------------------------------------------
+model DataSource {
+  id          String    @id @default(uuid()) @db.Uuid
+  // "google_geocoding" | "rentcast" | "attom" | "county_gis" | "mls_idx"
+  key         String    @unique
+  name        String
+  category    String?   // "geocoding" | "valuation" | "comps" | "public_records"
+  enabled     Boolean   @default(false)
+  // Compliance flag: only ToS-approved sources should ever be enabled.
+  approved    Boolean   @default(false)
+  baseUrl     String?   @map("base_url")
+  lastSyncedAt DateTime? @map("last_synced_at")
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("data_sources")
+}
