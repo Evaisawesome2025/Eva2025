@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RepairEstimator } from "@/components/repair-estimator";
+import { FinancingCalculator } from "@/components/financing-calculator";
+import { SensitivityTable } from "@/components/sensitivity-table";
 import { analyzeDeal } from "@/services/dealScoringService";
 import { formatCurrency, formatPercent, cn } from "@/lib/utils";
 import type { AnalysisInputs, SelectedAddress } from "@/lib/types";
@@ -138,6 +141,18 @@ export function AnalyzeForm() {
             ))}
           </CardContent>
         </Card>
+
+        {/* Helper calculators that populate the fields above. */}
+        <RepairEstimator
+          onApply={(total) =>
+            setInputs((prev) => ({ ...prev, estimatedRepairs: total }))
+          }
+        />
+        <FinancingCalculator
+          onApply={(carry) =>
+            setInputs((prev) => ({ ...prev, financingCost: carry }))
+          }
+        />
       </div>
 
       {/* Results — sticky so the verdict stays visible while scrolling inputs */}
@@ -190,6 +205,16 @@ export function AnalyzeForm() {
                 label="Cash-on-Cash ROI"
                 value={formatPercent(result.roiPercent)}
               />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Sensitivity Analysis</CardTitle>
+              <CardDescription>If the numbers move against you…</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SensitivityTable inputs={inputs} />
             </CardContent>
           </Card>
 

@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { Badge } from "@/components/ui/badge";
+import { DealCharts } from "@/components/deal-charts";
 import { formatCurrency } from "@/lib/utils";
 import { listDeals } from "@/lib/data";
 
@@ -72,6 +73,8 @@ export default async function DashboardPage() {
           );
         })}
       </div>
+
+      {deals.length > 0 && <DealCharts deals={deals} />}
 
       <Card>
         <CardHeader>

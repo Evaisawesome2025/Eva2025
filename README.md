@@ -20,9 +20,25 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 | `/`                 | Dashboard        | Pipeline stats + recent analyses                    |
 | `/analyze`          | Analyze Property | Address search + deal inputs + live score           |
 | `/properties/[id]`  | Property Detail  | Underwrite, status, comparables, notes              |
+| `/rental`           | Rental Analysis  | BRRRR / buy-and-hold: cap rate, cash flow, CoC, DSCR |
+| `/compare`          | Compare Deals    | Side-by-side comparison with best-value highlighting |
 | `/saved`            | Saved Deals      | Tracked deals sorted by flip score                  |
 | `/settings`         | Settings         | Data-source/API status + scoring assumptions        |
 | `/login`            | Login            | Email/password auth (when Supabase is configured)   |
+
+## Power tools
+
+- **Repair Estimator** — line-item rehab budget (roof, kitchen, HVAC, …) with a
+  contingency buffer that drops straight into the repairs field.
+- **Financing Calculator** — hard-money loan terms → monthly carry + points,
+  applied to the analysis in one click.
+- **Sensitivity Analysis** — a live grid showing how profit and the verdict move
+  as ARV and repairs flex ±, so you see the downside before you offer.
+- **Rental / BRRRR engine** (`rentalAnalysisService`) — NOI, cap rate, cash flow,
+  cash-on-cash, DSCR, and the 1% rule for buy-and-hold underwriting.
+- **Deal comparison** — stack your top opportunities and highlight the best
+  number in every row.
+- **Dashboard charts** — verdict mix + pipeline-by-status, dependency-free.
 
 ## Authentication
 
