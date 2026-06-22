@@ -39,6 +39,13 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 - **Deal comparison** — stack your top opportunities and highlight the best
   number in every row.
 - **Dashboard charts** — verdict mix + pipeline-by-status, dependency-free.
+- **Offer Scenarios** — max offer at conservative / standard / aggressive ARV
+  multipliers, flagged green/red against your purchase price.
+- **Customizable scoring** — tune the ARV rule, ROI/margin targets, and verdict
+  thresholds in Settings; saved to your browser and synced to Supabase when
+  signed in. The Analyze page scores live against your assumptions.
+- **Printable deal sheet** — a clean one-page PDF (`/properties/[id]/print`)
+  with the headline numbers, underwrite, and notes.
 
 ## Authentication
 

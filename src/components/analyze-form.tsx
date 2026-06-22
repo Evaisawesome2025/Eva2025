@@ -17,7 +17,13 @@ import { Label } from "@/components/ui/label";
 import { RepairEstimator } from "@/components/repair-estimator";
 import { FinancingCalculator } from "@/components/financing-calculator";
 import { SensitivityTable } from "@/components/sensitivity-table";
+import { OfferScenarios } from "@/components/offer-scenarios";
 import { analyzeDeal } from "@/services/dealScoringService";
+import {
+  loadLocalConfig,
+  DEFAULT_SCORING_CONFIG,
+  type ScoringConfig,
+} from "@/lib/scoring-config";
 import { formatCurrency, formatPercent, cn } from "@/lib/utils";
 import type { AnalysisInputs, SelectedAddress } from "@/lib/types";
 
@@ -59,11 +65,22 @@ const VERDICT_RING: Record<string, string> = {
 export function AnalyzeForm() {
   const [address, setAddress] = React.useState<SelectedAddress | null>(null);
   const [inputs, setInputs] = React.useState<AnalysisInputs>(DEFAULTS);
+  const [config, setConfig] = React.useState<ScoringConfig>(
+    DEFAULT_SCORING_CONFIG
+  );
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
 
+  // Apply the investor's saved scoring assumptions from Settings.
+  React.useEffect(() => {
+    setConfig(loadLocalConfig());
+  }, []);
+
   // Live recompute on every keystroke — fast decision making.
-  const result = React.useMemo(() => analyzeDeal(inputs), [inputs]);
+  const result = React.useMemo(
+    () => analyzeDeal(inputs, config),
+    [inputs, config]
+  );
 
   function update(key: keyof AnalysisInputs, raw: string) {
     const num = raw === "" ? 0 : Number(raw);
@@ -204,6 +221,20 @@ export function AnalyzeForm() {
               <ResultRow
                 label="Cash-on-Cash ROI"
                 value={formatPercent(result.roiPercent)}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Offer Scenarios</CardTitle>
+              <CardDescription>Max offer by ARV discipline</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <OfferScenarios
+                arv={inputs.estimatedArv}
+                repairs={inputs.estimatedRepairs}
+                purchasePrice={inputs.purchasePrice}
               />
             </CardContent>
           </Card>

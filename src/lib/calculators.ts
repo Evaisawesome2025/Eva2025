@@ -1,5 +1,5 @@
 import type { AnalysisInputs, Verdict } from "@/lib/types";
-import { analyzeDeal } from "@/services/dealScoringService";
+import { analyzeDeal, calculateMaxOffer } from "@/services/dealScoringService";
 
 // ---------------------------------------------------------------------------
 // Repair estimator — line-item rehab budgeting.
@@ -118,6 +118,68 @@ export interface SensitivityCell {
   profit: number;
   flipScore: number;
   verdict: Verdict;
+}
+
+// ---------------------------------------------------------------------------
+// Offer scenarios — max offer under several ARV-rule disciplines at once.
+// ---------------------------------------------------------------------------
+
+export interface OfferScenario {
+  label: string;
+  multiplier: number;
+  maxOffer: number;
+}
+
+/** Max offer at conservative / standard / aggressive ARV multipliers. */
+export function offerScenarios(
+  arv: number,
+  repairs: number,
+  multipliers: { label: string; value: number }[] = [
+    { label: "Conservative (65%)", value: 0.65 },
+    { label: "Standard (70%)", value: 0.7 },
+    { label: "Aggressive (75%)", value: 0.75 },
+  ]
+): OfferScenario[] {
+  return multipliers.map((m) => ({
+    label: m.label,
+    multiplier: m.value,
+    maxOffer: calculateMaxOffer(arv, repairs, m.value),
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Deal economics — total project cost and cash needed to close.
+// ---------------------------------------------------------------------------
+
+export interface DealEconomics {
+  totalProjectCost: number;
+  /** Cash to close = total cost − loan proceeds (financed amount). */
+  cashToClose: number;
+  /** Total cash in the deal including the rehab budget. */
+  totalCashInDeal: number;
+}
+
+export function dealEconomics(
+  inputs: AnalysisInputs,
+  loanAmount = 0
+): DealEconomics {
+  const holding = (inputs.financingCost || 0) * (inputs.holdingMonths || 0);
+  const totalProjectCost =
+    (inputs.purchasePrice || 0) +
+    (inputs.estimatedRepairs || 0) +
+    (inputs.closingCostEstimate || 0) +
+    holding;
+  const cashToClose = Math.max(
+    0,
+    (inputs.purchasePrice || 0) +
+      (inputs.closingCostEstimate || 0) -
+      loanAmount
+  );
+  return {
+    totalProjectCost: Math.round(totalProjectCost),
+    cashToClose: Math.round(cashToClose),
+    totalCashInDeal: Math.round(totalProjectCost - loanAmount),
+  };
 }
 
 /**

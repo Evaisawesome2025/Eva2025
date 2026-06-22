@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin, FileText } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -44,12 +44,20 @@ export default async function PropertyDetailPage({
 
   return (
     <div className="space-y-6">
-      <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link href="/saved">
-          <ArrowLeft />
-          Back
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
+          <Link href="/saved">
+            <ArrowLeft />
+            Back
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/properties/${deal.id}/print`}>
+            <FileText />
+            Deal Sheet
+          </Link>
+        </Button>
+      </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>

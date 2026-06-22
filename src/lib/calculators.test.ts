@@ -5,6 +5,8 @@ import {
   estimateArvFromComps,
   computeFinancing,
   buildSensitivityGrid,
+  offerScenarios,
+  dealEconomics,
   DEFAULT_REPAIR_CATALOG,
 } from "./calculators";
 import type { AnalysisInputs } from "@/lib/types";
@@ -108,5 +110,42 @@ describe("buildSensitivityGrid", () => {
     const grid = buildSensitivityGrid(base, [0], [0]);
     expect(grid[0][0].arv).toBe(300000);
     expect(grid[0][0].repairs).toBe(40000);
+  });
+});
+
+describe("offerScenarios", () => {
+  it("computes max offer at each multiplier", () => {
+    const scenarios = offerScenarios(300000, 40000);
+    expect(scenarios).toHaveLength(3);
+    // 300000 * 0.65 - 40000 = 155000
+    expect(scenarios[0].maxOffer).toBe(155000);
+    // 300000 * 0.70 - 40000 = 170000
+    expect(scenarios[1].maxOffer).toBe(170000);
+    // 300000 * 0.75 - 40000 = 185000
+    expect(scenarios[2].maxOffer).toBe(185000);
+  });
+});
+
+describe("dealEconomics", () => {
+  const base: AnalysisInputs = {
+    purchasePrice: 150000,
+    estimatedArv: 300000,
+    estimatedRepairs: 40000,
+    holdingMonths: 6,
+    financingCost: 1500,
+    sellingCostPct: 7,
+    closingCostEstimate: 4000,
+  };
+  it("computes project cost and cash to close with a loan", () => {
+    const econ = dealEconomics(base, 120000);
+    // project = 150000 + 40000 + 4000 + (1500*6=9000) = 203000
+    expect(econ.totalProjectCost).toBe(203000);
+    // cash to close = 150000 + 4000 - 120000 = 34000
+    expect(econ.cashToClose).toBe(34000);
+    expect(econ.totalCashInDeal).toBe(83000);
+  });
+  it("never returns a negative cash-to-close", () => {
+    const econ = dealEconomics(base, 999999);
+    expect(econ.cashToClose).toBe(0);
   });
 });

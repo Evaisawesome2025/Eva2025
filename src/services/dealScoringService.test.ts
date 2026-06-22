@@ -82,6 +82,44 @@ describe("scoreToVerdict thresholds", () => {
   });
 });
 
+describe("config-driven scoring", () => {
+  it("a custom ARV multiplier changes the max offer", () => {
+    expect(calculateMaxOffer(300000, 40000, 0.75)).toBe(185000);
+    expect(calculateMaxOffer(300000, 40000, 0.65)).toBe(155000);
+  });
+
+  it("custom verdict thresholds reclassify a score", () => {
+    // With a stricter green bar, a 72 is no longer green.
+    expect(
+      scoreToVerdict(72, {
+        arvMultiplier: 0.7,
+        targetRoiPct: 30,
+        targetMarginPct: 25,
+        greenThreshold: 80,
+        yellowThreshold: 50,
+      })
+    ).toBe("yellow");
+  });
+
+  it("a higher ROI target lowers the score for the same deal", () => {
+    const lenient = calculateFlipScore(strongDeal, {
+      arvMultiplier: 0.7,
+      targetRoiPct: 20,
+      targetMarginPct: 25,
+      greenThreshold: 70,
+      yellowThreshold: 45,
+    });
+    const strict = calculateFlipScore(strongDeal, {
+      arvMultiplier: 0.7,
+      targetRoiPct: 50,
+      targetMarginPct: 25,
+      greenThreshold: 70,
+      yellowThreshold: 45,
+    });
+    expect(lenient).toBeGreaterThanOrEqual(strict);
+  });
+});
+
 describe("analyzeDeal", () => {
   it("returns all computed fields consistently", () => {
     const result = analyzeDeal(strongDeal);
