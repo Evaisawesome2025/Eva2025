@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/data";
 import { analyzeDeal } from "@/services/dealScoringService";
 import type { AnalysisInputs, SelectedAddress } from "@/lib/types";
 
@@ -25,12 +25,8 @@ export async function POST(req: Request) {
     );
   }
 
-  // Authenticate via Supabase session.
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  // Authenticate via Supabase session (gracefully null in demo mode).
+  const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
