@@ -91,6 +91,7 @@ Every write route authenticates the Supabase user and enforces ownership.
 ## Getting started
 
 ```bash
+cd sioux-falls-flip-radar
 npm install
 cp .env.example .env        # fill in your keys
 npm run prisma:generate
