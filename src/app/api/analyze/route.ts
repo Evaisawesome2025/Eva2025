@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/data";
 import { analyzeDeal } from "@/services/dealScoringService";
-import type { AnalysisInputs, SelectedAddress } from "@/lib/types";
+import { analyzeBodySchema, parseBody } from "@/lib/validation";
 
 /**
  * POST /api/analyze
@@ -10,20 +10,11 @@ import type { AnalysisInputs, SelectedAddress } from "@/lib/types";
  * Recomputes results server-side so stored numbers can't be tampered with.
  */
 export async function POST(req: Request) {
-  let body: { address?: SelectedAddress; inputs?: AnalysisInputs };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  const parsed = await parseBody(req, analyzeBodySchema);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-
-  const { address, inputs } = body;
-  if (!address?.formattedAddress || !inputs) {
-    return NextResponse.json(
-      { error: "address and inputs are required" },
-      { status: 400 }
-    );
-  }
+  const { address, inputs } = parsed.data;
 
   // Authenticate via Supabase session (gracefully null in demo mode).
   const user = await getCurrentUser();

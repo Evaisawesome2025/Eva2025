@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/data";
 import { normalizeConfig } from "@/lib/scoring-config";
+import { settingsBodySchema, parseBody } from "@/lib/validation";
 
 /** GET /api/settings — the current user's saved settings (scoring config, …). */
 export async function GET() {
@@ -26,14 +27,13 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  const parsed = await parseBody(req, settingsBodySchema);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const body = parsed.data as Record<string, unknown>;
 
-  // Validate scoringConfig if present.
+  // Normalize scoringConfig (fills any defaults) if present.
   if (body.scoringConfig) {
     body.scoringConfig = normalizeConfig(
       body.scoringConfig as Record<string, number>

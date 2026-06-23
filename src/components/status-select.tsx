@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 const STATUS_OPTIONS = [
   { value: "watching", label: "Watching" },
@@ -18,6 +19,7 @@ export function StatusSelect({
   dealId: string;
   current: string;
 }) {
+  const { toast } = useToast();
   const [status, setStatus] = React.useState(current);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState(false);
@@ -34,9 +36,11 @@ export function StatusSelect({
         body: JSON.stringify({ status: next }),
       });
       if (!res.ok) throw new Error();
+      toast({ title: "Status updated", variant: "success" });
     } catch {
       setStatus(prev); // revert on failure
       setError(true);
+      toast({ title: "Couldn't update status", variant: "error" });
     } finally {
       setSaving(false);
     }

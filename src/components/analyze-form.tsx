@@ -20,6 +20,7 @@ import { SensitivityTable } from "@/components/sensitivity-table";
 import { OfferScenarios } from "@/components/offer-scenarios";
 import { SmartEstimate } from "@/components/smart-estimate";
 import { FlipVsHold } from "@/components/flip-vs-hold";
+import { useToast } from "@/components/ui/toast";
 import { dealEconomics } from "@/lib/calculators";
 import { analyzeDeal, flipScoreBreakdown } from "@/services/dealScoringService";
 import { recommendFlip } from "@/lib/instant-analysis";
@@ -67,6 +68,7 @@ const VERDICT_RING: Record<string, string> = {
 };
 
 export function AnalyzeForm() {
+  const { toast } = useToast();
   const [address, setAddress] = React.useState<SelectedAddress | null>(null);
   const [inputs, setInputs] = React.useState<AnalysisInputs>(DEFAULTS);
   const [config, setConfig] = React.useState<ScoringConfig>(
@@ -121,9 +123,24 @@ export function AnalyzeForm() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, inputs, result }),
+        body: JSON.stringify({ address, inputs }),
       });
-      if (res.ok) setSaved(true);
+      if (res.ok) {
+        setSaved(true);
+        toast({ title: "Deal saved", variant: "success" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast({
+          title: "Couldn't save",
+          description:
+            data.error === "Not authenticated"
+              ? "Sign in (connect Supabase) to save deals."
+              : data.error ?? "Please try again.",
+          variant: "error",
+        });
+      }
+    } catch {
+      toast({ title: "Network error", variant: "error" });
     } finally {
       setSaving(false);
     }

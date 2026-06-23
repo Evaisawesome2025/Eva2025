@@ -4,6 +4,7 @@ import * as React from "react";
 import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import type { DealNote } from "@/lib/data";
 
 export function NotesPanel({
@@ -13,15 +14,14 @@ export function NotesPanel({
   propertyId: string;
   initialNotes: DealNote[];
 }) {
+  const { toast } = useToast();
   const [notes, setNotes] = React.useState<DealNote[]>(initialNotes);
   const [draft, setDraft] = React.useState("");
   const [saving, setSaving] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
 
   async function addNote() {
     if (!draft.trim()) return;
     setSaving(true);
-    setError(null);
     try {
       const res = await fetch("/api/notes", {
         method: "POST",
@@ -35,8 +35,13 @@ export function NotesPanel({
       const note: DealNote = await res.json();
       setNotes((prev) => [note, ...prev]);
       setDraft("");
+      toast({ title: "Note added", variant: "success" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save note.");
+      toast({
+        title: "Couldn't add note",
+        description: err instanceof Error ? err.message : undefined,
+        variant: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -50,7 +55,6 @@ export function NotesPanel({
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Walkthrough notes, contractor bids, reminders…"
         />
-        {error && <p className="text-sm text-destructive">{error}</p>}
         <Button onClick={addNote} disabled={saving || !draft.trim()} size="sm">
           {saving ? <Loader2 className="animate-spin" /> : <Plus />}
           Add note
