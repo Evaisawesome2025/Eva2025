@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { Badge } from "@/components/ui/badge";
 import { DealCharts } from "@/components/deal-charts";
+import { DemoBanner } from "@/components/demo-banner";
 import { formatCurrency } from "@/lib/utils";
 import { listDeals } from "@/lib/data";
 
@@ -40,6 +41,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <DemoBanner />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>

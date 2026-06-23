@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { MainNav } from "@/components/main-nav";
 import { CommandPalette } from "@/components/command-palette";
@@ -7,6 +7,13 @@ import { ToastProvider } from "@/components/ui/toast";
 export const metadata: Metadata = {
   title: "Sioux Falls Flip Radar",
   description: "Private real estate investing dashboard for fast flip decisions.",
+  manifest: "/manifest.webmanifest",
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  appleWebApp: { capable: true, title: "Flip Radar", statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
