@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/data";
-
-const VALID_STATUSES = [
-  "watching",
-  "pursuing",
-  "offer_made",
-  "under_contract",
-  "passed",
-];
+import { savedDealStatusSchema, parseBody } from "@/lib/validation";
 
 /** PATCH /api/saved-deals/[id] — update a saved deal's pipeline status. */
 export async function PATCH(
@@ -20,19 +13,11 @@ export async function PATCH(
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  let body: { status?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  const parsed = await parseBody(req, savedDealStatusSchema);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-
-  if (!body.status || !VALID_STATUSES.includes(body.status)) {
-    return NextResponse.json(
-      { error: `status must be one of: ${VALID_STATUSES.join(", ")}` },
-      { status: 400 }
-    );
-  }
+  const body = parsed.data;
 
   try {
     const result = await prisma.savedDeal.updateMany({

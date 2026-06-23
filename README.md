@@ -54,6 +54,12 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 - **Pipeline map** (`/map`) — every deal plotted and color-coded by verdict
   (Google Maps; degrades to a location list without a key).
 - **Command palette** — ⌘K / Ctrl+K to jump to any page or deal instantly.
+- **BRRRR refinance** — new-loan, cash-out, and capital-left-in math with
+  infinite-return detection, right on the Rental page.
+- **Rehab presets** — Cosmetic / Moderate / Gut one-click line-item budgets.
+- **Portfolio analytics** (`/portfolio`) — pipeline profit, capital required,
+  by-county breakdown, verdict mix, and your best deal.
+- **Loading skeletons** — instant skeleton states on data-backed pages.
 
 ## Authentication
 
@@ -122,10 +128,17 @@ The data layer is built to plug in **approved** providers only. Placeholder
 service wrappers (env-var driven) are ready in `src/services/`:
 
 - `googleGeocodingService` — Places/Geocoding (county, lat/lng)
-- `rentcastService` — RentCast AVM + comps
+- `countyDataService` — **keyless** ArcGIS reader for public county GIS parcel +
+  sales data (e.g. Minnehaha County). Configurable field mapping; our own
+  no-API data layer for subject facts and comps.
+- `rentcastService` — RentCast AVM + comps (free tier: 50 calls/mo)
 - `attomService` — ATTOM property/sales records
-- `countyDataService` — Minnehaha/Lincoln County GIS open data
 - `dealScoringService` — the flip math (live, no key needed)
+
+**Auto-valuation without a paid API:** the Analyze page's **Smart Estimate** +
+**Comps Builder** derive ARV from county data or from comparable sales you enter
+yourself (median $/sqft) — no RentCast required. Add a provider key only if you
+want fully hands-off comps.
 
 > This app does **not** scrape Zillow, Realtor.com, Redfin, Facebook
 > Marketplace, or any site that disallows automated access. Add only

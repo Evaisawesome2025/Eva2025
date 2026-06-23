@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/data";
 import { getComparables } from "@/services/rentcastService";
+import { compsBodySchema, parseBody } from "@/lib/validation";
 
 /**
  * POST /api/comps — fetch comparable sales from an approved provider
@@ -13,19 +14,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  let body: { propertyId?: string; address?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  const parsed = await parseBody(req, compsBodySchema);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-
-  if (!body.propertyId || !body.address) {
-    return NextResponse.json(
-      { error: "propertyId and address are required" },
-      { status: 400 }
-    );
-  }
+  const body = parsed.data;
 
   try {
     const property = await prisma.property.findFirst({

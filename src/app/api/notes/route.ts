@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/data";
+import { noteBodySchema, parseBody } from "@/lib/validation";
 
 /** POST /api/notes — add a note to a property the user owns. */
 export async function POST(req: Request) {
@@ -9,19 +10,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  let body: { propertyId?: string; body?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  const parsed = await parseBody(req, noteBodySchema);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-
-  if (!body.propertyId || !body.body?.trim()) {
-    return NextResponse.json(
-      { error: "propertyId and body are required" },
-      { status: 400 }
-    );
-  }
+  const body = parsed.data;
 
   try {
     // Ownership check before writing.

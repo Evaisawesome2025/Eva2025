@@ -11,6 +11,7 @@ import {
   Bookmark,
   Map as MapIcon,
   Settings,
+  PieChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DealSummary } from "@/lib/data";
@@ -29,6 +30,7 @@ const PAGES: Item[] = [
   { id: "p-analyze", label: "Analyze Property", href: "/analyze", icon: Calculator, group: "Pages" },
   { id: "p-rental", label: "Rental Analysis", href: "/rental", icon: Home, group: "Pages" },
   { id: "p-compare", label: "Compare Deals", href: "/compare", icon: GitCompare, group: "Pages" },
+  { id: "p-portfolio", label: "Portfolio Analytics", href: "/portfolio", icon: PieChart, group: "Pages" },
   { id: "p-saved", label: "Saved Deals", href: "/saved", icon: Bookmark, group: "Pages" },
   { id: "p-map", label: "Pipeline Map", href: "/map", icon: MapIcon, group: "Pages" },
   { id: "p-settings", label: "Settings", href: "/settings", icon: Settings, group: "Pages" },

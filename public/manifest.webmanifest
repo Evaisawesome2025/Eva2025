@@ -1,0 +1,17 @@
+{
+  "name": "Sioux Falls Flip Radar",
+  "short_name": "Flip Radar",
+  "description": "Private real estate investing dashboard for fast flip decisions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

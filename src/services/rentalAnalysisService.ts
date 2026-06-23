@@ -228,3 +228,50 @@ export function analyzeRental(inputs: RentalInputs): RentalResult {
     totalCashInvested: Math.round(totalCashInvested),
   };
 }
+
+// ---------------------------------------------------------------------------
+// BRRRR refinance — the "Refinance" in Buy, Rehab, Rent, Refinance, Repeat.
+// After rehab, you refinance against the new (ARV) value to pull cash back out.
+// ---------------------------------------------------------------------------
+
+export interface RefinanceInputs {
+  /** After-repair value the appraiser is expected to hit. */
+  arv: number;
+  /** All-in cost: purchase + repairs + closing + holding. */
+  totalInvested: number;
+  /** Balance of any existing acquisition loan to pay off at refi. */
+  existingLoanPayoff: number;
+  /** Lender loan-to-value on the refinance (typically 70–75%). */
+  refinanceLtvPct: number;
+  /** Refinance closing costs. */
+  refinanceClosingCosts: number;
+}
+
+export interface RefinanceResult {
+  /** New loan amount = ARV × LTV. */
+  newLoanAmount: number;
+  /** Cash returned to you at closing after payoff + costs. */
+  cashOut: number;
+  /** Capital still tied up after the refi (0 = full BRRRR). */
+  capitalLeftInDeal: number;
+  /** True when you pulled all (or more than all) your cash back out. */
+  infiniteReturn: boolean;
+  /** Equity remaining after the new loan (ARV − new loan). */
+  equityRemaining: number;
+}
+
+export function analyzeRefinance(inputs: RefinanceInputs): RefinanceResult {
+  const newLoanAmount = (inputs.arv || 0) * ((inputs.refinanceLtvPct || 0) / 100);
+  const cashOut =
+    newLoanAmount -
+    (inputs.existingLoanPayoff || 0) -
+    (inputs.refinanceClosingCosts || 0);
+  const capitalLeftInDeal = Math.max(0, (inputs.totalInvested || 0) - cashOut);
+  return {
+    newLoanAmount: Math.round(newLoanAmount),
+    cashOut: Math.round(cashOut),
+    capitalLeftInDeal: Math.round(capitalLeftInDeal),
+    infiniteReturn: cashOut >= (inputs.totalInvested || 0),
+    equityRemaining: Math.round((inputs.arv || 0) - newLoanAmount),
+  };
+}

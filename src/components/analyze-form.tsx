@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Calculator } from "lucide-react";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,12 @@ import { RepairEstimator } from "@/components/repair-estimator";
 import { FinancingCalculator } from "@/components/financing-calculator";
 import { SensitivityTable } from "@/components/sensitivity-table";
 import { OfferScenarios } from "@/components/offer-scenarios";
+import { SmartEstimate } from "@/components/smart-estimate";
+import { FlipVsHold } from "@/components/flip-vs-hold";
+import { useToast } from "@/components/ui/toast";
 import { dealEconomics } from "@/lib/calculators";
-import { analyzeDeal } from "@/services/dealScoringService";
+import { analyzeDeal, flipScoreBreakdown } from "@/services/dealScoringService";
+import { recommendFlip } from "@/lib/instant-analysis";
 import {
   loadLocalConfig,
   DEFAULT_SCORING_CONFIG,
@@ -64,6 +68,7 @@ const VERDICT_RING: Record<string, string> = {
 };
 
 export function AnalyzeForm() {
+  const { toast } = useToast();
   const [address, setAddress] = React.useState<SelectedAddress | null>(null);
   const [inputs, setInputs] = React.useState<AnalysisInputs>(DEFAULTS);
   const [config, setConfig] = React.useState<ScoringConfig>(
@@ -71,6 +76,8 @@ export function AnalyzeForm() {
   );
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
+  const [analyzed, setAnalyzed] = React.useState(false);
+  const resultsRef = React.useRef<HTMLDivElement>(null);
 
   // Apply the investor's saved scoring assumptions from Settings.
   React.useEffect(() => {
@@ -83,6 +90,25 @@ export function AnalyzeForm() {
     [inputs, config]
   );
   const econ = React.useMemo(() => dealEconomics(inputs), [inputs]);
+  const breakdown = React.useMemo(
+    () => flipScoreBreakdown(inputs, config),
+    [inputs, config]
+  );
+  const recommendation = React.useMemo(
+    () => recommendFlip(result, inputs.purchasePrice, result.maxOffer),
+    [result, inputs.purchasePrice]
+  );
+
+  const canAnalyze = Boolean(address) && inputs.estimatedArv > 0;
+
+  function runAnalysis() {
+    if (!canAnalyze) return;
+    setAnalyzed(true);
+    // On smaller screens the results sit below the form — bring them into view.
+    requestAnimationFrame(() =>
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    );
+  }
 
   function update(key: keyof AnalysisInputs, raw: string) {
     const num = raw === "" ? 0 : Number(raw);
@@ -97,9 +123,24 @@ export function AnalyzeForm() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, inputs, result }),
+        body: JSON.stringify({ address, inputs }),
       });
-      if (res.ok) setSaved(true);
+      if (res.ok) {
+        setSaved(true);
+        toast({ title: "Deal saved", variant: "success" });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast({
+          title: "Couldn't save",
+          description:
+            data.error === "Not authenticated"
+              ? "Sign in (connect Supabase) to save deals."
+              : data.error ?? "Please try again.",
+          variant: "error",
+        });
+      }
+    } catch {
+      toast({ title: "Network error", variant: "error" });
     } finally {
       setSaving(false);
     }
@@ -131,13 +172,25 @@ export function AnalyzeForm() {
                 </div>
               </div>
             )}
+            <SmartEstimate
+              address={address}
+              onApply={(arv, repairs) =>
+                setInputs((prev) => ({
+                  ...prev,
+                  estimatedArv: arv,
+                  estimatedRepairs: repairs,
+                }))
+              }
+            />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Deal Inputs</CardTitle>
-            <CardDescription>Enter your numbers — results update live.</CardDescription>
+            <CardDescription>
+              Auto-filled by Smart Estimate — adjust any number to fine-tune.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             {FIELDS.map((f) => (
@@ -172,11 +225,72 @@ export function AnalyzeForm() {
             setInputs((prev) => ({ ...prev, financingCost: carry }))
           }
         />
+
+        {/* Primary action */}
+        <Button
+          size="lg"
+          className="w-full"
+          disabled={!canAnalyze}
+          onClick={runAnalysis}
+        >
+          <Calculator />
+          Analyze Property
+        </Button>
+        {!canAnalyze && (
+          <p className="text-center text-xs text-muted-foreground">
+            {address
+              ? "Enter an estimated ARV to analyze."
+              : "Select a property address to analyze."}
+          </p>
+        )}
       </div>
 
       {/* Results — sticky so the verdict stays visible while scrolling inputs */}
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2" ref={resultsRef}>
+        {!analyzed ? (
+          <Card className="lg:sticky lg:top-20">
+            <CardContent className="flex flex-col items-center justify-center gap-2 p-10 text-center">
+              <Calculator className="size-8 text-muted-foreground" />
+              <div className="font-medium">Your analysis will appear here</div>
+              <p className="text-sm text-muted-foreground">
+                Pick an address, enter your numbers, and hit{" "}
+                <span className="font-medium">Analyze Property</span> to see the
+                max offer, estimated profit, and flip score.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
         <div className="space-y-4 lg:sticky lg:top-20">
+          <div
+            className={cn(
+              "rounded-lg border-l-4 p-4",
+              recommendation.rec === "good" &&
+                "border-green-500 bg-green-50 dark:bg-green-950/30",
+              recommendation.rec === "maybe" &&
+                "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30",
+              recommendation.rec === "pass" &&
+                "border-red-500 bg-red-50 dark:bg-red-950/30"
+            )}
+          >
+            <div
+              className={cn(
+                "text-lg font-bold",
+                recommendation.rec === "good" && "text-green-700 dark:text-green-400",
+                recommendation.rec === "maybe" && "text-yellow-700 dark:text-yellow-400",
+                recommendation.rec === "pass" && "text-red-700 dark:text-red-400"
+              )}
+            >
+              {recommendation.rec === "good"
+                ? "✓ Good flip"
+                : recommendation.rec === "maybe"
+                  ? "~ Maybe — proceed carefully"
+                  : "✕ Pass on this one"}
+            </div>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {recommendation.reason}
+            </p>
+          </div>
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle>Flip Score</CardTitle>
@@ -204,6 +318,13 @@ export function AnalyzeForm() {
                   )}
                   style={{ width: `${result.flipScore}%` }}
                 />
+              </div>
+
+              {/* Why this score */}
+              <div className="mt-4 space-y-2">
+                <ScoreBar label="Cash-on-cash ROI" value={breakdown.roi} max={45} />
+                <ScoreBar label="Profit margin" value={breakdown.margin} max={35} />
+                <ScoreBar label="Purchase cushion" value={breakdown.cushion} max={20} />
               </div>
             </CardContent>
           </Card>
@@ -237,11 +358,43 @@ export function AnalyzeForm() {
               <CardTitle className="text-base">Offer Scenarios</CardTitle>
               <CardDescription>Max offer by ARV discipline</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <OfferScenarios
                 arv={inputs.estimatedArv}
                 repairs={inputs.estimatedRepairs}
                 purchasePrice={inputs.purchasePrice}
+              />
+              {result.maxOffer > 0 && inputs.purchasePrice !== result.maxOffer && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() =>
+                    setInputs((prev) => ({
+                      ...prev,
+                      purchasePrice: result.maxOffer,
+                    }))
+                  }
+                >
+                  Set purchase price to max offer (
+                  {formatCurrency(result.maxOffer)})
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Flip vs Hold</CardTitle>
+              <CardDescription>Which play wins on this property?</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FlipVsHold
+                purchasePrice={inputs.purchasePrice}
+                estimatedRepairs={inputs.estimatedRepairs}
+                closingCost={inputs.closingCostEstimate}
+                flipProfit={result.estimatedProfit}
+                flipRoiPct={result.roiPercent}
               />
             </CardContent>
           </Card>
@@ -274,6 +427,35 @@ export function AnalyzeForm() {
             </p>
           )}
         </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScoreBar({
+  label,
+  value,
+  max,
+}: {
+  label: string;
+  value: number;
+  max: number;
+}) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div>
+      <div className="mb-0.5 flex justify-between text-xs text-muted-foreground">
+        <span>{label}</span>
+        <span className="tabular-nums">
+          {value}/{max}
+        </span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary/70 transition-all"
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

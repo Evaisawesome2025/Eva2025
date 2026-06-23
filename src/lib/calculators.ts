@@ -70,6 +70,47 @@ export function estimateArvFromComps(
   };
 }
 
+export interface PpsfStats {
+  low: number;
+  median: number;
+  high: number;
+  count: number;
+}
+
+/**
+ * Spread of price-per-sqft across comps — gives a confidence range, not just a
+ * point estimate. low/high are the min/max usable comp $/sqft.
+ */
+export function pricePerSqftStats(comps: ComplikeSale[]): PpsfStats {
+  const ppsfs = comps
+    .filter((c) => (c.salePrice ?? 0) > 0 && (c.sqft ?? 0) > 0)
+    .map((c) => c.salePrice! / c.sqft!)
+    .sort((a, b) => a - b);
+  if (ppsfs.length === 0) return { low: 0, median: 0, high: 0, count: 0 };
+  const mid = Math.floor(ppsfs.length / 2);
+  const median =
+    ppsfs.length % 2 === 0 ? (ppsfs[mid - 1] + ppsfs[mid]) / 2 : ppsfs[mid];
+  return {
+    low: Math.round(ppsfs[0]),
+    median: Math.round(median),
+    high: Math.round(ppsfs[ppsfs.length - 1]),
+    count: ppsfs.length,
+  };
+}
+
+/** Median price-per-sqft across comps — more robust to outliers than the mean. */
+export function medianPricePerSqft(comps: ComplikeSale[]): number {
+  const ppsfs = comps
+    .filter((c) => (c.salePrice ?? 0) > 0 && (c.sqft ?? 0) > 0)
+    .map((c) => c.salePrice! / c.sqft!)
+    .sort((a, b) => a - b);
+  if (ppsfs.length === 0) return 0;
+  const mid = Math.floor(ppsfs.length / 2);
+  const median =
+    ppsfs.length % 2 === 0 ? (ppsfs[mid - 1] + ppsfs[mid]) / 2 : ppsfs[mid];
+  return Math.round(median);
+}
+
 // ---------------------------------------------------------------------------
 // Hard-money / financing calculator — turns loan terms into the monthly carry
 // that the flip analysis expects (interest-only is the norm for hard money).

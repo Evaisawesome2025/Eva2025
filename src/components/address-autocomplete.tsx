@@ -7,14 +7,15 @@ import { cn } from "@/lib/utils";
 import type { SelectedAddress } from "@/lib/types";
 
 /**
- * Google-style address autocomplete backed by the Google Places JS library.
+ * Google-style address autocomplete.
  *
- * Loads the Places library on demand using NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
- * When no key is configured (e.g. local dev), it gracefully degrades to a plain
- * text input + a "use raw address" fallback so the rest of the app still works.
+ * - With NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: uses the Google Places JS library for
+ *   rich incremental suggestions.
+ * - Without a key: falls back to a keyless server endpoint (/api/address/suggest,
+ *   backed by the U.S. Census geocoder) so autocomplete still works out of the box.
  *
- * On selection it emits a fully structured `SelectedAddress` including
- * place_id, lat/lng, city, state, zip, and county.
+ * Either way, selecting a result emits a fully structured SelectedAddress
+ * (place_id when available, lat/lng, city, state, zip, county).
  */
 
 interface AddressAutocompleteProps {
@@ -26,12 +27,10 @@ interface AddressAutocompleteProps {
 
 // --- Google Maps script loader (singleton) ---
 let googleMapsPromise: Promise<void> | null = null;
-
 function loadGoogleMaps(apiKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if ((window as any).google?.maps?.places) return Promise.resolve();
   if (googleMapsPromise) return googleMapsPromise;
-
   googleMapsPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
@@ -44,7 +43,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
   return googleMapsPromise;
 }
 
-function component(
+function gComponent(
   components: google.maps.GeocoderAddressComponent[],
   type: string,
   short = false
@@ -57,21 +56,27 @@ function component(
 export function AddressAutocomplete({
   onSelect,
   defaultValue = "",
-  placeholder = "Enter a property address…",
+  placeholder = "Start typing a property address…",
   className,
 }: AddressAutocompleteProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const wrapRef = React.useRef<HTMLDivElement>(null);
   const [value, setValue] = React.useState(defaultValue);
   const [loading, setLoading] = React.useState(false);
-  const [ready, setReady] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<SelectedAddress[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [activeIndex, setActiveIndex] = React.useState(-1);
+
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const useGoogle = Boolean(apiKey);
+  const skipNextFetch = React.useRef(false);
 
+  // --- Google Places path ---
   React.useEffect(() => {
-    if (!apiKey) return;
+    if (!useGoogle) return;
     let autocomplete: google.maps.places.Autocomplete | null = null;
-
     setLoading(true);
-    loadGoogleMaps(apiKey)
+    loadGoogleMaps(apiKey!)
       .then(() => {
         if (!inputRef.current) return;
         autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
@@ -88,24 +93,20 @@ export function AddressAutocomplete({
             placeId: place.place_id ?? "",
             latitude: place.geometry?.location?.lat() ?? null,
             longitude: place.geometry?.location?.lng() ?? null,
-            street: [
-              component(comps, "street_number"),
-              component(comps, "route"),
-            ]
+            street: [gComponent(comps, "street_number"), gComponent(comps, "route")]
               .filter(Boolean)
               .join(" "),
             city:
-              component(comps, "locality") ||
-              component(comps, "sublocality") ||
-              component(comps, "administrative_area_level_3"),
-            state: component(comps, "administrative_area_level_1", true),
-            zip: component(comps, "postal_code"),
-            county: component(comps, "administrative_area_level_2"),
+              gComponent(comps, "locality") ||
+              gComponent(comps, "sublocality") ||
+              gComponent(comps, "administrative_area_level_3"),
+            state: gComponent(comps, "administrative_area_level_1", true),
+            zip: gComponent(comps, "postal_code"),
+            county: gComponent(comps, "administrative_area_level_2"),
           };
           setValue(selected.formattedAddress);
           onSelect(selected);
         });
-        setReady(true);
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
@@ -114,36 +115,106 @@ export function AddressAutocomplete({
       if (autocomplete) google.maps.event.clearInstanceListeners(autocomplete);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKey]);
+  }, [useGoogle, apiKey]);
 
-  // Fallback: emit a minimal address from raw text when Places isn't available.
-  function handleManualSubmit() {
-    if (!value.trim()) return;
-    onSelect({
-      formattedAddress: value.trim(),
-      placeId: "",
-      latitude: null,
-      longitude: null,
-      city: "",
-      state: "",
-      zip: "",
-      county: "",
-    });
+  // --- Keyless server-suggest path (debounced) ---
+  React.useEffect(() => {
+    if (useGoogle) return;
+    if (skipNextFetch.current) {
+      skipNextFetch.current = false;
+      return;
+    }
+    const q = value.trim();
+    if (q.length < 5) {
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
+    const controller = new AbortController();
+    const t = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/address/suggest?q=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        setSuggestions(data.suggestions ?? []);
+        setActiveIndex(-1);
+        setOpen((data.suggestions ?? []).length > 0);
+      } catch {
+        /* aborted or failed — ignore */
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [value, useGoogle]);
+
+  // Close the dropdown on outside click.
+  React.useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  function pick(s: SelectedAddress) {
+    skipNextFetch.current = true;
+    setValue(s.formattedAddress);
+    setSuggestions([]);
+    setOpen(false);
+    setActiveIndex(-1);
+    onSelect(s);
+  }
+
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (useGoogle) return;
+    if (!open || suggestions.length === 0) {
+      if (e.key === "Enter" && value.trim()) {
+        // No suggestions yet — accept the typed text as a raw address.
+        e.preventDefault();
+        pick({
+          formattedAddress: value.trim(),
+          placeId: "",
+          latitude: null,
+          longitude: null,
+          city: "",
+          state: "",
+          zip: "",
+          county: "",
+        });
+      }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      pick(suggestions[activeIndex >= 0 ? activeIndex : 0]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
   }
 
   return (
-    <div className={cn("relative", className)}>
+    <div ref={wrapRef} className={cn("relative", className)}>
       <MapPin className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         ref={inputRef}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !ready) {
-            e.preventDefault();
-            handleManualSubmit();
-          }
-        }}
+        onKeyDown={onKeyDown}
+        onFocus={() => suggestions.length > 0 && setOpen(true)}
         placeholder={placeholder}
         className="pl-9 pr-9"
         autoComplete="off"
@@ -151,11 +222,26 @@ export function AddressAutocomplete({
       {loading && (
         <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
       )}
-      {!apiKey && (
-        <p className="mt-1 text-xs text-muted-foreground">
-          Set <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> for autocomplete.
-          Press Enter to use the typed address.
-        </p>
+
+      {!useGoogle && open && suggestions.length > 0 && (
+        <ul className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-md border bg-background shadow-lg">
+          {suggestions.map((s, i) => (
+            <li key={`${s.formattedAddress}-${i}`}>
+              <button
+                type="button"
+                onMouseEnter={() => setActiveIndex(i)}
+                onClick={() => pick(s)}
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-2 text-left text-sm",
+                  activeIndex === i ? "bg-accent" : "hover:bg-accent/50"
+                )}
+              >
+                <MapPin className="size-4 shrink-0 text-muted-foreground" />
+                <span className="truncate">{s.formattedAddress}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

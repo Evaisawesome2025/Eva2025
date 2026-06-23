@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   analyzeRental,
   projectRental,
+  analyzeRefinance,
   type RentalInputs,
 } from "@/services/rentalAnalysisService";
 import { formatCurrency, formatPercent, cn } from "@/lib/utils";
@@ -64,6 +65,24 @@ export function RentalForm() {
 
   const [appreciationPct, setAppreciationPct] = React.useState(3);
   const [rentGrowthPct, setRentGrowthPct] = React.useState(2);
+  const [arv, setArv] = React.useState(0);
+  const [refiLtv, setRefiLtv] = React.useState(75);
+  const [refiClosing, setRefiClosing] = React.useState(0);
+
+  const refi = React.useMemo(() => {
+    const downPayment =
+      (inputs.purchasePrice || 0) * ((inputs.downPaymentPct || 0) / 100);
+    return analyzeRefinance({
+      arv,
+      totalInvested:
+        (inputs.purchasePrice || 0) +
+        (inputs.estimatedRepairs || 0) +
+        (inputs.closingCosts || 0),
+      existingLoanPayoff: (inputs.purchasePrice || 0) - downPayment,
+      refinanceLtvPct: refiLtv,
+      refinanceClosingCosts: refiClosing,
+    });
+  }, [inputs, arv, refiLtv, refiClosing]);
 
   const r = React.useMemo(() => analyzeRental(inputs), [inputs]);
   const projection = React.useMemo(
@@ -263,6 +282,113 @@ export function RentalForm() {
         </p>
       </CardContent>
     </Card>
+
+    {/* BRRRR refinance */}
+    <Card>
+      <CardHeader>
+        <CardTitle>BRRRR Refinance</CardTitle>
+        <CardDescription>
+          Pull your capital back out by refinancing against the after-repair
+          value.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="refi-arv">After-Repair Value ($)</Label>
+            <Input
+              id="refi-arv"
+              type="number"
+              step={1000}
+              min={0}
+              value={arv === 0 ? "" : arv}
+              placeholder="0"
+              onChange={(e) => setArv(Number(e.target.value) || 0)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="refi-ltv">Refinance LTV (%)</Label>
+            <Input
+              id="refi-ltv"
+              type="number"
+              step={1}
+              min={0}
+              value={refiLtv}
+              onChange={(e) => setRefiLtv(Number(e.target.value) || 0)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="refi-cc">Refi Closing Costs ($)</Label>
+            <Input
+              id="refi-cc"
+              type="number"
+              step={500}
+              min={0}
+              value={refiClosing === 0 ? "" : refiClosing}
+              placeholder="0"
+              onChange={(e) => setRefiClosing(Number(e.target.value) || 0)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Metric label="New Loan" value={formatCurrency(refi.newLoanAmount)} />
+          <Metric
+            label="Cash Out"
+            value={formatCurrency(refi.cashOut)}
+            tone={refi.cashOut >= 0 ? "good" : "bad"}
+          />
+          <Metric
+            label="Capital Left In"
+            value={formatCurrency(refi.capitalLeftInDeal)}
+            tone={refi.capitalLeftInDeal === 0 ? "good" : undefined}
+          />
+          <Metric
+            label="Equity Remaining"
+            value={formatCurrency(refi.equityRemaining)}
+          />
+        </div>
+
+        {arv > 0 && (
+          <div>
+            {refi.infiniteReturn ? (
+              <Badge variant="green">
+                Full BRRRR — all capital recovered (infinite return)
+              </Badge>
+            ) : (
+              <Badge variant="yellow">
+                {formatCurrency(refi.capitalLeftInDeal)} left in the deal
+              </Badge>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+    </div>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "good" | "bad";
+}) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div
+        className={cn(
+          "text-lg font-semibold tabular-nums",
+          tone === "good" && "text-green-600",
+          tone === "bad" && "text-red-600"
+        )}
+      >
+        {value}
+      </div>
     </div>
   );
 }
