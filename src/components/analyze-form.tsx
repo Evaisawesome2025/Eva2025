@@ -18,8 +18,10 @@ import { RepairEstimator } from "@/components/repair-estimator";
 import { FinancingCalculator } from "@/components/financing-calculator";
 import { SensitivityTable } from "@/components/sensitivity-table";
 import { OfferScenarios } from "@/components/offer-scenarios";
+import { SmartEstimate } from "@/components/smart-estimate";
 import { dealEconomics } from "@/lib/calculators";
 import { analyzeDeal } from "@/services/dealScoringService";
+import { recommendFlip } from "@/lib/instant-analysis";
 import {
   loadLocalConfig,
   DEFAULT_SCORING_CONFIG,
@@ -85,6 +87,10 @@ export function AnalyzeForm() {
     [inputs, config]
   );
   const econ = React.useMemo(() => dealEconomics(inputs), [inputs]);
+  const recommendation = React.useMemo(
+    () => recommendFlip(result, inputs.purchasePrice, result.maxOffer),
+    [result, inputs.purchasePrice]
+  );
 
   const canAnalyze = Boolean(address) && inputs.estimatedArv > 0;
 
@@ -144,13 +150,25 @@ export function AnalyzeForm() {
                 </div>
               </div>
             )}
+            <SmartEstimate
+              address={address}
+              onApply={(arv, repairs) =>
+                setInputs((prev) => ({
+                  ...prev,
+                  estimatedArv: arv,
+                  estimatedRepairs: repairs,
+                }))
+              }
+            />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Deal Inputs</CardTitle>
-            <CardDescription>Enter your numbers — results update live.</CardDescription>
+            <CardDescription>
+              Auto-filled by Smart Estimate — adjust any number to fine-tune.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             {FIELDS.map((f) => (
@@ -221,6 +239,36 @@ export function AnalyzeForm() {
           </Card>
         ) : (
         <div className="space-y-4 lg:sticky lg:top-20">
+          <div
+            className={cn(
+              "rounded-lg border-l-4 p-4",
+              recommendation.rec === "good" &&
+                "border-green-500 bg-green-50 dark:bg-green-950/30",
+              recommendation.rec === "maybe" &&
+                "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30",
+              recommendation.rec === "pass" &&
+                "border-red-500 bg-red-50 dark:bg-red-950/30"
+            )}
+          >
+            <div
+              className={cn(
+                "text-lg font-bold",
+                recommendation.rec === "good" && "text-green-700 dark:text-green-400",
+                recommendation.rec === "maybe" && "text-yellow-700 dark:text-yellow-400",
+                recommendation.rec === "pass" && "text-red-700 dark:text-red-400"
+              )}
+            >
+              {recommendation.rec === "good"
+                ? "✓ Good flip"
+                : recommendation.rec === "maybe"
+                  ? "~ Maybe — proceed carefully"
+                  : "✕ Pass on this one"}
+            </div>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {recommendation.reason}
+            </p>
+          </div>
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle>Flip Score</CardTitle>
