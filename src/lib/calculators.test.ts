@@ -3,6 +3,7 @@ import {
   sumLineItems,
   withContingency,
   estimateArvFromComps,
+  medianPricePerSqft,
   computeFinancing,
   buildSensitivityGrid,
   offerScenarios,
@@ -62,6 +63,32 @@ describe("estimateArvFromComps", () => {
   });
   it("returns zeros when there is no usable data", () => {
     expect(estimateArvFromComps([], 1500).arv).toBe(0);
+  });
+});
+
+describe("medianPricePerSqft", () => {
+  it("takes the median ppsf (odd count)", () => {
+    // ppsf: 100, 200, 300 -> median 200
+    expect(
+      medianPricePerSqft([
+        { salePrice: 100000, sqft: 1000 },
+        { salePrice: 400000, sqft: 2000 },
+        { salePrice: 300000, sqft: 1000 },
+      ])
+    ).toBe(200);
+  });
+  it("averages the two middle values (even count)", () => {
+    // ppsf: 100, 200 -> median 150
+    expect(
+      medianPricePerSqft([
+        { salePrice: 100000, sqft: 1000 },
+        { salePrice: 200000, sqft: 1000 },
+      ])
+    ).toBe(150);
+  });
+  it("ignores unusable comps and returns 0 when empty", () => {
+    expect(medianPricePerSqft([{ salePrice: null, sqft: 1000 }])).toBe(0);
+    expect(medianPricePerSqft([])).toBe(0);
   });
 });
 

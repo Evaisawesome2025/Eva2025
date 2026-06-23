@@ -128,10 +128,17 @@ The data layer is built to plug in **approved** providers only. Placeholder
 service wrappers (env-var driven) are ready in `src/services/`:
 
 - `googleGeocodingService` — Places/Geocoding (county, lat/lng)
-- `rentcastService` — RentCast AVM + comps
+- `countyDataService` — **keyless** ArcGIS reader for public county GIS parcel +
+  sales data (e.g. Minnehaha County). Configurable field mapping; our own
+  no-API data layer for subject facts and comps.
+- `rentcastService` — RentCast AVM + comps (free tier: 50 calls/mo)
 - `attomService` — ATTOM property/sales records
-- `countyDataService` — Minnehaha/Lincoln County GIS open data
 - `dealScoringService` — the flip math (live, no key needed)
+
+**Auto-valuation without a paid API:** the Analyze page's **Smart Estimate** +
+**Comps Builder** derive ARV from county data or from comparable sales you enter
+yourself (median $/sqft) — no RentCast required. Add a provider key only if you
+want fully hands-off comps.
 
 > This app does **not** scrape Zillow, Realtor.com, Redfin, Facebook
 > Marketplace, or any site that disallows automated access. Add only

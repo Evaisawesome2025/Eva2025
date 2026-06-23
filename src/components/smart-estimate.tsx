@@ -5,6 +5,7 @@ import { Wand2, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CompsBuilder } from "@/components/comps-builder";
 import { formatCurrency, cn } from "@/lib/utils";
 import {
   estimateArv,
@@ -156,6 +157,17 @@ export function SmartEstimate({
       {note && (
         <p className={cn("mt-2 text-xs text-muted-foreground")}>{note}</p>
       )}
+
+      <div className="mt-3">
+        <CompsBuilder
+          subjectSqft={sqft}
+          onPpsf={(v) => {
+            setMarketPpsf(v);
+            setNote("Market $/sqft set from your comps.");
+            setApplied(false);
+          }}
+        />
+      </div>
     </div>
   );
 }

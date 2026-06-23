@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPropertyDetail } from "@/services/attomService";
 import { getValueEstimate, getComparables } from "@/services/rentcastService";
+import { getParcelByAddress, getNearbyComps } from "@/services/countyDataService";
+import { medianPricePerSqft } from "@/lib/calculators";
 import { DEFAULT_MARKET_PPSF } from "@/lib/instant-analysis";
 
 export const dynamic = "force-dynamic";
@@ -27,13 +29,36 @@ export async function GET(req: Request) {
   let avm: number | null = null;
   const sources: string[] = [];
 
+  // 1) County GIS open data (keyless, public records) — our own data layer.
+  try {
+    const parcel = await getParcelByAddress(address);
+    if (parcel) {
+      if (parcel.sqft) sqft = parcel.sqft;
+      if (parcel.assessedValue) avm = parcel.assessedValue;
+      sources.push("county_gis");
+
+      if (parcel.latitude != null && parcel.longitude != null) {
+        const comps = await getNearbyComps(parcel.latitude, parcel.longitude, 1);
+        const m = medianPricePerSqft(
+          comps.map((c) => ({ salePrice: c.salePrice, sqft: c.sqft }))
+        );
+        if (m > 0) {
+          compPpsf = m;
+          sources.push("county_sales");
+        }
+      }
+    }
+  } catch (e) {
+    console.error("[lookup county]", e);
+  }
+
   // Subject structural details (ATTOM).
   try {
     const detail = await getPropertyDetail(address, "");
     if (detail) {
-      sqft = detail.sqft;
-      beds = detail.beds;
-      baths = detail.baths;
+      sqft = sqft ?? detail.sqft;
+      beds = beds ?? detail.beds;
+      baths = baths ?? detail.baths;
       sources.push("attom");
     }
   } catch (e) {
@@ -47,7 +72,7 @@ export async function GET(req: Request) {
       .filter((c) => (c.salePrice ?? 0) > 0 && (c.sqft ?? 0) > 0)
       .map((c) => c.salePrice! / c.sqft!)
       .sort((a, b) => a - b);
-    if (ppsfs.length > 0) {
+    if (ppsfs.length > 0 && !compPpsf) {
       compPpsf = Math.round(ppsfs[Math.floor(ppsfs.length / 2)]);
       sources.push("rentcast_comps");
     }
@@ -59,7 +84,7 @@ export async function GET(req: Request) {
   try {
     const est = await getValueEstimate(address);
     if (est?.price) {
-      avm = est.price;
+      avm = avm ?? est.price;
       sources.push("rentcast_avm");
       // If we have sqft but no comp ppsf, derive it from the AVM.
       if (!compPpsf && sqft) compPpsf = Math.round(est.price / sqft);

@@ -70,6 +70,19 @@ export function estimateArvFromComps(
   };
 }
 
+/** Median price-per-sqft across comps — more robust to outliers than the mean. */
+export function medianPricePerSqft(comps: ComplikeSale[]): number {
+  const ppsfs = comps
+    .filter((c) => (c.salePrice ?? 0) > 0 && (c.sqft ?? 0) > 0)
+    .map((c) => c.salePrice! / c.sqft!)
+    .sort((a, b) => a - b);
+  if (ppsfs.length === 0) return 0;
+  const mid = Math.floor(ppsfs.length / 2);
+  const median =
+    ppsfs.length % 2 === 0 ? (ppsfs[mid - 1] + ppsfs[mid]) / 2 : ppsfs[mid];
+  return Math.round(median);
+}
+
 // ---------------------------------------------------------------------------
 // Hard-money / financing calculator — turns loan terms into the monthly carry
 // that the flip analysis expects (interest-only is the norm for hard money).
