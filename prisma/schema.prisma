@@ -29,6 +29,7 @@ model User {
   analyses   PropertyAnalysis[]
   savedDeals SavedDeal[]
   notes      Note[]
+  photos     PropertyPhoto[]
 
   @@map("users")
 }
@@ -63,11 +64,31 @@ model Property {
   comparables ComparableSale[]
   savedDeals  SavedDeal[]
   notes       Note[]
+  photos      PropertyPhoto[]
 
   @@unique([userId, placeId])
   @@index([userId])
   @@index([city, state])
   @@map("properties")
+}
+
+// ---------------------------------------------------------------------------
+// Property photos — metadata for images stored in Supabase Storage.
+// ---------------------------------------------------------------------------
+model PropertyPhoto {
+  id          String   @id @default(uuid()) @db.Uuid
+  propertyId  String   @map("property_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  // Path within the Supabase Storage "property-photos" bucket.
+  storagePath String   @map("storage_path")
+  caption     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_photos")
 }
 
 // ---------------------------------------------------------------------------
@@ -138,6 +159,8 @@ model SavedDeal {
   analysisId String?  @map("analysis_id") @db.Uuid
   // "watching" | "pursuing" | "offer_made" | "under_contract" | "passed"
   status     String   @default("watching")
+  // Public, unguessable token for a read-only shared deal sheet (null = private).
+  shareToken String?  @unique @map("share_token")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 

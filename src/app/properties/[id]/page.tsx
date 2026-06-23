@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotesPanel } from "@/components/notes-panel";
 import { CompsPanel } from "@/components/comps-panel";
 import { StatusSelect } from "@/components/status-select";
+import { PhotoManager } from "@/components/photo-manager";
+import { ShareButton } from "@/components/share-button";
 import { formatCurrency, cn } from "@/lib/utils";
 import { getDealDetail } from "@/lib/data";
 
@@ -51,12 +53,15 @@ export default async function PropertyDetailPage({
             Back
           </Link>
         </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/properties/${deal.id}/print`}>
-            <FileText />
-            Deal Sheet
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <ShareButton dealId={deal.id} initialToken={deal.shareToken} />
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/properties/${deal.id}/print`}>
+              <FileText />
+              Deal Sheet
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -83,6 +88,7 @@ export default async function PropertyDetailPage({
         <TabsList>
           <TabsTrigger value="analysis">Analysis</TabsTrigger>
           <TabsTrigger value="comps">Comparables</TabsTrigger>
+          <TabsTrigger value="photos">Photos</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
@@ -131,6 +137,23 @@ export default async function PropertyDetailPage({
                 propertyId={deal.propertyId}
                 address={deal.formattedAddress}
                 initialComps={deal.comps}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="photos">
+          <Card>
+            <CardHeader>
+              <CardTitle>Photos</CardTitle>
+              <CardDescription>
+                Walkthrough and listing photos for this property.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PhotoManager
+                propertyId={deal.propertyId}
+                initialPhotos={deal.photos}
               />
             </CardContent>
           </Card>
