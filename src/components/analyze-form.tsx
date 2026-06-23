@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Calculator } from "lucide-react";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,8 @@ export function AnalyzeForm() {
   );
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
+  const [analyzed, setAnalyzed] = React.useState(false);
+  const resultsRef = React.useRef<HTMLDivElement>(null);
 
   // Apply the investor's saved scoring assumptions from Settings.
   React.useEffect(() => {
@@ -83,6 +85,17 @@ export function AnalyzeForm() {
     [inputs, config]
   );
   const econ = React.useMemo(() => dealEconomics(inputs), [inputs]);
+
+  const canAnalyze = Boolean(address) && inputs.estimatedArv > 0;
+
+  function runAnalysis() {
+    if (!canAnalyze) return;
+    setAnalyzed(true);
+    // On smaller screens the results sit below the form — bring them into view.
+    requestAnimationFrame(() =>
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    );
+  }
 
   function update(key: keyof AnalysisInputs, raw: string) {
     const num = raw === "" ? 0 : Number(raw);
@@ -172,10 +185,41 @@ export function AnalyzeForm() {
             setInputs((prev) => ({ ...prev, financingCost: carry }))
           }
         />
+
+        {/* Primary action */}
+        <Button
+          size="lg"
+          className="w-full"
+          disabled={!canAnalyze}
+          onClick={runAnalysis}
+        >
+          <Calculator />
+          Analyze Property
+        </Button>
+        {!canAnalyze && (
+          <p className="text-center text-xs text-muted-foreground">
+            {address
+              ? "Enter an estimated ARV to analyze."
+              : "Select a property address to analyze."}
+          </p>
+        )}
       </div>
 
       {/* Results — sticky so the verdict stays visible while scrolling inputs */}
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2" ref={resultsRef}>
+        {!analyzed ? (
+          <Card className="lg:sticky lg:top-20">
+            <CardContent className="flex flex-col items-center justify-center gap-2 p-10 text-center">
+              <Calculator className="size-8 text-muted-foreground" />
+              <div className="font-medium">Your analysis will appear here</div>
+              <p className="text-sm text-muted-foreground">
+                Pick an address, enter your numbers, and hit{" "}
+                <span className="font-medium">Analyze Property</span> to see the
+                max offer, estimated profit, and flip score.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
         <div className="space-y-4 lg:sticky lg:top-20">
           <Card>
             <CardHeader className="pb-2">
@@ -274,6 +318,7 @@ export function AnalyzeForm() {
             </p>
           )}
         </div>
+        )}
       </div>
     </div>
   );
