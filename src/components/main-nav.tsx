@@ -13,6 +13,7 @@ import {
   GitCompare,
   Map as MapIcon,
   Search,
+  PieChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { href: "/analyze", label: "Analyze", icon: Calculator },
   { href: "/rental", label: "Rental", icon: Home },
   { href: "/compare", label: "Compare", icon: GitCompare },
+  { href: "/portfolio", label: "Portfolio", icon: PieChart },
   { href: "/map", label: "Map", icon: MapIcon },
   { href: "/saved", label: "Saved", icon: Bookmark },
   { href: "/settings", label: "Settings", icon: Settings },

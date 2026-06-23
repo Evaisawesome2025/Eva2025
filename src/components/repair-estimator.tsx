@@ -14,6 +14,34 @@ import {
 } from "@/lib/calculators";
 
 /** Collapsible line-item rehab budget that feeds the "repairs" field. */
+// Typical per-line budgets for a ~1,400 sqft Sioux Falls SFR.
+const PRESETS: Record<string, Record<string, number>> = {
+  Cosmetic: { paint: 4000, flooring: 6000, landscaping: 1500, permits: 500 },
+  Moderate: {
+    kitchen: 12000,
+    bathrooms: 6000,
+    flooring: 8000,
+    paint: 5000,
+    hvac: 5000,
+    landscaping: 2000,
+    permits: 1500,
+  },
+  Gut: {
+    roof: 12000,
+    hvac: 8000,
+    kitchen: 20000,
+    bathrooms: 12000,
+    flooring: 12000,
+    paint: 7000,
+    windows: 8000,
+    electrical: 8000,
+    plumbing: 8000,
+    foundation: 5000,
+    landscaping: 3000,
+    permits: 3000,
+  },
+};
+
 export function RepairEstimator({
   onApply,
 }: {
@@ -28,6 +56,14 @@ export function RepairEstimator({
 
   const base = sumLineItems(items);
   const total = withContingency(base, contingency);
+
+  function applyPreset(name: string) {
+    const preset = PRESETS[name];
+    setItems((prev) =>
+      prev.map((i) => ({ ...i, cost: preset[i.key] ?? 0 }))
+    );
+    setApplied(false);
+  }
 
   function update(key: string, cost: number) {
     setItems((prev) =>
@@ -57,6 +93,19 @@ export function RepairEstimator({
 
       {open && (
         <div className="space-y-4 border-t p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">Quick presets:</span>
+            {Object.keys(PRESETS).map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => applyPreset(name)}
+                className="rounded-full border px-3 py-1 text-xs transition-colors hover:bg-accent"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {items.map((item) => (
               <div key={item.key} className="space-y-1">

@@ -54,6 +54,12 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 - **Pipeline map** (`/map`) — every deal plotted and color-coded by verdict
   (Google Maps; degrades to a location list without a key).
 - **Command palette** — ⌘K / Ctrl+K to jump to any page or deal instantly.
+- **BRRRR refinance** — new-loan, cash-out, and capital-left-in math with
+  infinite-return detection, right on the Rental page.
+- **Rehab presets** — Cosmetic / Moderate / Gut one-click line-item budgets.
+- **Portfolio analytics** (`/portfolio`) — pipeline profit, capital required,
+  by-county breakdown, verdict mix, and your best deal.
+- **Loading skeletons** — instant skeleton states on data-backed pages.
 
 ## Authentication
 

@@ -4,6 +4,7 @@ import {
   monthlyMortgagePayment,
   remainingBalance,
   projectRental,
+  analyzeRefinance,
   type RentalInputs,
 } from "./rentalAnalysisService";
 
@@ -103,6 +104,50 @@ describe("analyzeRental", () => {
     it("accumulates cash flow", () => {
       const proj = projectRental(inputs);
       expect(proj[1].cumulativeCashFlow).not.toBe(proj[0].cumulativeCashFlow);
+    });
+  });
+
+  describe("analyzeRefinance (BRRRR)", () => {
+    it("computes the new loan, cash-out, and capital left in", () => {
+      const r = analyzeRefinance({
+        arv: 300000,
+        totalInvested: 200000,
+        existingLoanPayoff: 150000,
+        refinanceLtvPct: 75,
+        refinanceClosingCosts: 5000,
+      });
+      // new loan = 300000 * 0.75 = 225000
+      expect(r.newLoanAmount).toBe(225000);
+      // cash out = 225000 - 150000 - 5000 = 70000
+      expect(r.cashOut).toBe(70000);
+      // capital left = 200000 - 70000 = 130000
+      expect(r.capitalLeftInDeal).toBe(130000);
+      // equity remaining = 300000 - 225000 = 75000
+      expect(r.equityRemaining).toBe(75000);
+      expect(r.infiniteReturn).toBe(false);
+    });
+
+    it("flags an infinite return when all cash is recouped", () => {
+      const r = analyzeRefinance({
+        arv: 320000,
+        totalInvested: 180000,
+        existingLoanPayoff: 120000,
+        refinanceLtvPct: 75,
+        refinanceClosingCosts: 6000,
+      });
+      // cash out = 240000 - 120000 - 6000 = 114000 < 180000 invested
+      expect(r.infiniteReturn).toBe(false);
+
+      const strong = analyzeRefinance({
+        arv: 400000,
+        totalInvested: 150000,
+        existingLoanPayoff: 120000,
+        refinanceLtvPct: 75,
+        refinanceClosingCosts: 6000,
+      });
+      // cash out = 300000 - 120000 - 6000 = 174000 >= 150000 → infinite
+      expect(strong.infiniteReturn).toBe(true);
+      expect(strong.capitalLeftInDeal).toBe(0);
     });
   });
 });
