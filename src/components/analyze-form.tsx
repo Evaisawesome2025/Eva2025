@@ -20,7 +20,7 @@ import { SensitivityTable } from "@/components/sensitivity-table";
 import { OfferScenarios } from "@/components/offer-scenarios";
 import { SmartEstimate } from "@/components/smart-estimate";
 import { dealEconomics } from "@/lib/calculators";
-import { analyzeDeal } from "@/services/dealScoringService";
+import { analyzeDeal, flipScoreBreakdown } from "@/services/dealScoringService";
 import { recommendFlip } from "@/lib/instant-analysis";
 import {
   loadLocalConfig,
@@ -87,6 +87,10 @@ export function AnalyzeForm() {
     [inputs, config]
   );
   const econ = React.useMemo(() => dealEconomics(inputs), [inputs]);
+  const breakdown = React.useMemo(
+    () => flipScoreBreakdown(inputs, config),
+    [inputs, config]
+  );
   const recommendation = React.useMemo(
     () => recommendFlip(result, inputs.purchasePrice, result.maxOffer),
     [result, inputs.purchasePrice]
@@ -297,6 +301,13 @@ export function AnalyzeForm() {
                   style={{ width: `${result.flipScore}%` }}
                 />
               </div>
+
+              {/* Why this score */}
+              <div className="mt-4 space-y-2">
+                <ScoreBar label="Cash-on-cash ROI" value={breakdown.roi} max={45} />
+                <ScoreBar label="Profit margin" value={breakdown.margin} max={35} />
+                <ScoreBar label="Purchase cushion" value={breakdown.cushion} max={20} />
+              </div>
             </CardContent>
           </Card>
 
@@ -329,12 +340,28 @@ export function AnalyzeForm() {
               <CardTitle className="text-base">Offer Scenarios</CardTitle>
               <CardDescription>Max offer by ARV discipline</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <OfferScenarios
                 arv={inputs.estimatedArv}
                 repairs={inputs.estimatedRepairs}
                 purchasePrice={inputs.purchasePrice}
               />
+              {result.maxOffer > 0 && inputs.purchasePrice !== result.maxOffer && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() =>
+                    setInputs((prev) => ({
+                      ...prev,
+                      purchasePrice: result.maxOffer,
+                    }))
+                  }
+                >
+                  Set purchase price to max offer (
+                  {formatCurrency(result.maxOffer)})
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -367,6 +394,34 @@ export function AnalyzeForm() {
           )}
         </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ScoreBar({
+  label,
+  value,
+  max,
+}: {
+  label: string;
+  value: number;
+  max: number;
+}) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div>
+      <div className="mb-0.5 flex justify-between text-xs text-muted-foreground">
+        <span>{label}</span>
+        <span className="tabular-nums">
+          {value}/{max}
+        </span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary/70 transition-all"
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

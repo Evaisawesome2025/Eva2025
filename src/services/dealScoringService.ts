@@ -104,6 +104,44 @@ export function calculateFlipScore(
   return Math.max(0, Math.min(100, Math.round(raw)));
 }
 
+export interface ScoreBreakdown {
+  /** ROI component, out of 45. */
+  roi: number;
+  /** Profit-margin component, out of 35. */
+  margin: number;
+  /** Purchase-cushion component, out of 20. */
+  cushion: number;
+}
+
+/**
+ * The three weighted components behind the flip score, so an investor can see
+ * exactly why a deal scored the way it did. Components sum to the flip score
+ * (before rounding/clamping).
+ */
+export function flipScoreBreakdown(
+  inputs: AnalysisInputs,
+  config: ScoringConfig = DEFAULT_SCORING_CONFIG
+): ScoreBreakdown {
+  const profit = calculateEstimatedProfit(inputs);
+  const invested = calculateTotalInvested(inputs);
+  const maxOffer = calculateMaxOffer(
+    inputs.estimatedArv,
+    inputs.estimatedRepairs,
+    config.arvMultiplier
+  );
+
+  const roi = invested > 0 ? profit / invested : 0;
+  const margin = inputs.estimatedArv > 0 ? profit / inputs.estimatedArv : 0;
+  const cushion =
+    maxOffer > 0 ? (maxOffer - inputs.purchasePrice) / maxOffer : 0;
+
+  return {
+    roi: Math.round(clamp01(roi / (config.targetRoiPct / 100)) * 45),
+    margin: Math.round(clamp01(margin / (config.targetMarginPct / 100)) * 35),
+    cushion: Math.round(clamp01((cushion + 0.05) / 0.2) * 20),
+  };
+}
+
 /** Green / yellow / red verdict derived from the flip score. */
 export function scoreToVerdict(
   score: number,

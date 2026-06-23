@@ -4,6 +4,7 @@ import {
   calculateEstimatedProfit,
   calculateTotalInvested,
   calculateFlipScore,
+  flipScoreBreakdown,
   scoreToVerdict,
   analyzeDeal,
 } from "./dealScoringService";
@@ -117,6 +118,20 @@ describe("config-driven scoring", () => {
       yellowThreshold: 45,
     });
     expect(lenient).toBeGreaterThanOrEqual(strict);
+  });
+});
+
+describe("flipScoreBreakdown", () => {
+  it("components are within their caps and roughly sum to the score", () => {
+    const b = flipScoreBreakdown(strongDeal);
+    expect(b.roi).toBeGreaterThanOrEqual(0);
+    expect(b.roi).toBeLessThanOrEqual(45);
+    expect(b.margin).toBeLessThanOrEqual(35);
+    expect(b.cushion).toBeLessThanOrEqual(20);
+    const sum = b.roi + b.margin + b.cushion;
+    const score = calculateFlipScore(strongDeal);
+    // Sum of rounded components should be within a couple points of the score.
+    expect(Math.abs(sum - score)).toBeLessThanOrEqual(3);
   });
 });
 

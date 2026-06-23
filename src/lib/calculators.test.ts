@@ -4,6 +4,7 @@ import {
   withContingency,
   estimateArvFromComps,
   medianPricePerSqft,
+  pricePerSqftStats,
   computeFinancing,
   buildSensitivityGrid,
   offerScenarios,
@@ -89,6 +90,25 @@ describe("medianPricePerSqft", () => {
   it("ignores unusable comps and returns 0 when empty", () => {
     expect(medianPricePerSqft([{ salePrice: null, sqft: 1000 }])).toBe(0);
     expect(medianPricePerSqft([])).toBe(0);
+  });
+});
+
+describe("pricePerSqftStats", () => {
+  it("returns low / median / high / count", () => {
+    const s = pricePerSqftStats([
+      { salePrice: 100000, sqft: 1000 }, // 100
+      { salePrice: 200000, sqft: 1000 }, // 200
+      { salePrice: 300000, sqft: 1000 }, // 300
+    ]);
+    expect(s).toEqual({ low: 100, median: 200, high: 300, count: 3 });
+  });
+  it("returns zeros when empty", () => {
+    expect(pricePerSqftStats([])).toEqual({
+      low: 0,
+      median: 0,
+      high: 0,
+      count: 0,
+    });
   });
 });
 

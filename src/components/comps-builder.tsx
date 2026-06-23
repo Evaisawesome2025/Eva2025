@@ -5,7 +5,7 @@ import { ChevronDown, Building2, Plus, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, cn } from "@/lib/utils";
-import { medianPricePerSqft } from "@/lib/calculators";
+import { pricePerSqftStats } from "@/lib/calculators";
 
 interface CompRow {
   id: string;
@@ -38,9 +38,12 @@ export function CompsBuilder({
   const [rows, setRows] = React.useState<CompRow[]>([blank(), blank(), blank()]);
   const [applied, setApplied] = React.useState(false);
 
-  const ppsf = medianPricePerSqft(rows);
+  const stats = pricePerSqftStats(rows);
+  const ppsf = stats.median;
   const impliedArv = ppsf > 0 && subjectSqft > 0 ? ppsf * subjectSqft : 0;
-  const usableCount = rows.filter((r) => r.salePrice > 0 && r.sqft > 0).length;
+  const arvLow = subjectSqft > 0 ? stats.low * subjectSqft : 0;
+  const arvHigh = subjectSqft > 0 ? stats.high * subjectSqft : 0;
+  const usableCount = stats.count;
 
   function update(id: string, field: keyof CompRow, value: string) {
     setRows((prev) =>
@@ -141,6 +144,12 @@ export function CompsBuilder({
               <span className="font-semibold text-foreground">
                 {ppsf > 0 ? `$${ppsf}/sqft` : "—"}
               </span>
+              {usableCount > 1 && (
+                <span className="text-xs">
+                  {" "}
+                  (range ${stats.low}–${stats.high})
+                </span>
+              )}
               {impliedArv > 0 && (
                 <>
                   {" "}
@@ -148,6 +157,12 @@ export function CompsBuilder({
                   <span className="font-semibold text-foreground">
                     {formatCurrency(impliedArv)}
                   </span>
+                  {arvHigh > arvLow && (
+                    <span className="text-xs">
+                      {" "}
+                      ({formatCurrency(arvLow)}–{formatCurrency(arvHigh)})
+                    </span>
+                  )}
                 </>
               )}
             </div>
