@@ -19,6 +19,7 @@ import { FinancingCalculator } from "@/components/financing-calculator";
 import { SensitivityTable } from "@/components/sensitivity-table";
 import { OfferScenarios } from "@/components/offer-scenarios";
 import { SmartEstimate } from "@/components/smart-estimate";
+import { FlipVsHold } from "@/components/flip-vs-hold";
 import { dealEconomics } from "@/lib/calculators";
 import { analyzeDeal, flipScoreBreakdown } from "@/services/dealScoringService";
 import { recommendFlip } from "@/lib/instant-analysis";
@@ -362,6 +363,22 @@ export function AnalyzeForm() {
                   {formatCurrency(result.maxOffer)})
                 </Button>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Flip vs Hold</CardTitle>
+              <CardDescription>Which play wins on this property?</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FlipVsHold
+                purchasePrice={inputs.purchasePrice}
+                estimatedRepairs={inputs.estimatedRepairs}
+                closingCost={inputs.closingCostEstimate}
+                flipProfit={result.estimatedProfit}
+                flipRoiPct={result.roiPercent}
+              />
             </CardContent>
           </Card>
 
