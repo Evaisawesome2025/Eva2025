@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glen's Lemons — Fresh Squeezed Lemonade in Sioux Falls, SD</title>
+  <meta
+    name="description"
+    content="Glen's Lemons serves fresh squeezed lemonade made with simple ingredients — just water, sugar, and real lemons. Find us around Sioux Falls, South Dakota."
+  />
+  <meta name="theme-color" content="#FFD23F" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:title" content="Glen's Lemons — Fresh Squeezed Lemonade" />
+  <meta
+    property="og:description"
+    content="Fresh squeezed lemonade. Simple ingredients: water, sugar, and lemons. Sioux Falls, SD."
+  />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%8B%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ===== Header / Nav ===== -->
+  <header class="site-header">
+    <nav class="nav container" aria-label="Primary">
+      <a class="brand" href="#top">
+        <span class="brand__icon" aria-hidden="true">🍋</span>
+        <span class="brand__name">Glen's Lemons</span>
+      </a>
+      <button class="nav__toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__menu" id="nav-menu">
+        <li><a href="#about">About</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#find-us">Find Us</a></li>
+        <li><a class="btn btn--small" href="#find-us">Get Lemonade</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- ===== Hero ===== -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <p class="eyebrow">Sioux Falls, South Dakota</p>
+          <h1 class="hero__title">Fresh Squeezed Lemonade</h1>
+          <p class="hero__lede">
+            Hand-squeezed, ice-cold, and made the honest way. Just three simple
+            ingredients in every cup — <strong>water, sugar, and real lemons.</strong>
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#find-us">Find Our Stand</a>
+            <a class="btn btn--ghost" href="#menu">See the Menu</a>
+          </div>
+          <ul class="hero__badges">
+            <li>🍋 Always hand-squeezed</li>
+            <li>❄️ Served ice-cold</li>
+            <li>💛 Family made</li>
+          </ul>
+        </div>
+        <div class="hero__art" aria-hidden="true">
+          <div class="glass">
+            <div class="glass__lemonade">
+              <span class="bubble"></span>
+              <span class="bubble"></span>
+              <span class="bubble"></span>
+            </div>
+            <div class="glass__lemon">🍋</div>
+            <div class="glass__straw"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <path d="M0,64L60,58.7C120,53,240,43,360,48C480,53,600,75,720,80C840,85,960,75,1080,64C1200,53,1320,43,1380,37.3L1440,32L1440,120L0,120Z"></path>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ===== About ===== -->
+    <section id="about" class="section about">
+      <div class="container about__inner">
+        <div class="about__text">
+          <p class="eyebrow eyebrow--dark">Our Story</p>
+          <h2>Simple ingredients. Honest lemonade.</h2>
+          <p>
+            Glen's Lemons started with a simple idea: a glass of lemonade should
+            taste like real lemons — nothing more, nothing less. No powders, no
+            mystery mixes, no shortcuts.
+          </p>
+          <p>
+            Every batch is hand-squeezed fresh and stirred with just the right
+            amount of sugar, then poured over ice for that crisp, puckery finish
+            that makes a hot Sioux Falls afternoon feel a whole lot better.
+          </p>
+          <p class="about__signature">— Glen 🍋</p>
+        </div>
+        <ul class="ingredients" aria-label="Ingredients">
+          <li class="ingredient">
+            <span class="ingredient__icon">💧</span>
+            <h3>Water</h3>
+            <p>Clean and cold, the perfect base.</p>
+          </li>
+          <li class="ingredient">
+            <span class="ingredient__icon">🍬</span>
+            <h3>Sugar</h3>
+            <p>Just enough for the perfect sweet-tart balance.</p>
+          </li>
+          <li class="ingredient">
+            <span class="ingredient__icon">🍋</span>
+            <h3>Lemons</h3>
+            <p>Real lemons, squeezed fresh by hand every batch.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Menu ===== -->
+    <section id="menu" class="section menu">
+      <div class="container">
+        <div class="section__head">
+          <p class="eyebrow eyebrow--dark">The Menu</p>
+          <h2>What's in the Cup</h2>
+          <p class="section__sub">
+            One thing, done right. Sizes to match your thirst.
+          </p>
+        </div>
+        <div class="menu__grid">
+          <article class="menu-card">
+            <h3>The Small</h3>
+            <p class="menu-card__size">12 oz</p>
+            <p class="menu-card__price">$2</p>
+            <p class="menu-card__desc">A quick, refreshing pick-me-up.</p>
+          </article>
+          <article class="menu-card menu-card--featured">
+            <span class="menu-card__tag">Most Popular</span>
+            <h3>The Classic</h3>
+            <p class="menu-card__size">16 oz</p>
+            <p class="menu-card__price">$3</p>
+            <p class="menu-card__desc">Our signature glass of fresh squeezed.</p>
+          </article>
+          <article class="menu-card">
+            <h3>The Big Squeeze</h3>
+            <p class="menu-card__size">24 oz</p>
+            <p class="menu-card__price">$4</p>
+            <p class="menu-card__desc">For serious lemonade lovers.</p>
+          </article>
+        </div>
+        <p class="menu__note">
+          🍋 Bring the whole crew? Ask about our pitcher to-go.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== Find Us ===== -->
+    <section id="find-us" class="section find-us">
+      <div class="container find-us__inner">
+        <div class="find-us__text">
+          <p class="eyebrow eyebrow--dark">Find Us</p>
+          <h2>Look for the lemon-yellow stand</h2>
+          <p>
+            We pop up at parks, farmers markets, and neighborhood corners all
+            around <strong>Sioux Falls, South Dakota</strong> — especially on
+            sunny weekends. Follow along to catch where we'll be next.
+          </p>
+          <ul class="find-us__details">
+            <li><span aria-hidden="true">📍</span> Sioux Falls, SD</li>
+            <li><span aria-hidden="true">🗓️</span> Weekends &amp; sunny afternoons</li>
+            <li><span aria-hidden="true">🌤️</span> Spring through fall</li>
+          </ul>
+          <a class="btn btn--primary" href="mailto:hello@glenslemons.com">Book Us for an Event</a>
+        </div>
+        <div class="find-us__card">
+          <h3>Hours</h3>
+          <ul class="hours">
+            <li><span>Mon – Thu</span><span>By event</span></li>
+            <li><span>Friday</span><span>3pm – 7pm</span></li>
+            <li><span>Saturday</span><span>10am – 7pm</span></li>
+            <li><span>Sunday</span><span>11am – 5pm</span></li>
+          </ul>
+          <p class="find-us__weather">
+            ☀️ Hours follow the sunshine — check back before you head out!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta">
+      <div class="container cta__inner">
+        <h2>Thirsty yet?</h2>
+        <p>Come find the freshest lemonade in Sioux Falls.</p>
+        <a class="btn btn--dark" href="#find-us">Find the Stand</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <span class="brand__icon" aria-hidden="true">🍋</span>
+        <span class="brand__name">Glen's Lemons</span>
+        <p class="footer__tag">Fresh Squeezed Lemonade · Sioux Falls, SD</p>
+      </div>
+      <div class="footer__contact">
+        <a href="mailto:hello@glenslemons.com">hello@glenslemons.com</a>
+        <p class="footer__small">Water · Sugar · Lemons. That's it.</p>
+      </div>
+    </div>
+    <p class="footer__copy">© <span id="year"></span> Glen's Lemons. Made with 🍋 in Sioux Falls, South Dakota.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
