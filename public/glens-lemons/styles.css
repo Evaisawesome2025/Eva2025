@@ -268,6 +268,11 @@ a { color: inherit; }
   gap: 1.5rem;
   align-items: stretch;
 }
+/* Single-item menu: one centered card */
+.menu__grid--single {
+  grid-template-columns: minmax(0, 340px);
+  justify-content: center;
+}
 .menu-card {
   position: relative;
   background: var(--white);
