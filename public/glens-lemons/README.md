@@ -15,27 +15,37 @@ in **Sioux Falls, South Dakota**.
 
 It's a plain static site — no build step, no dependencies.
 
+## Live link
+
+The site lives in this Next.js app's `public/glens-lemons/` folder, so the Vercel
+deployment serves it directly. A rewrite in `next.config.js` maps the clean path:
+
+- **`/glens-lemons`** → `public/glens-lemons/index.html`
+
+So on any deployment (preview or production) the live URL is
+`https://<deployment-domain>/glens-lemons`.
+
 ## View it locally
 
 Just open `index.html` in any browser:
 
 ```bash
-open glens-lemons/index.html      # macOS
-xdg-open glens-lemons/index.html  # Linux
+xdg-open public/glens-lemons/index.html  # Linux
+open public/glens-lemons/index.html      # macOS
 ```
 
 Or serve the folder (so anchor links and assets behave like production):
 
 ```bash
-cd glens-lemons
+cd public/glens-lemons
 python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
 ## Deploying
 
-Because it's static, you can host the `glens-lemons/` folder on any static host —
-GitHub Pages, Netlify, Vercel, Cloudflare Pages, or an S3 bucket. No server needed.
+Because it's static, you can also host this folder on any static host —
+GitHub Pages, Netlify, Cloudflare Pages, or an S3 bucket. No server needed.
 
 ## Customizing
 
