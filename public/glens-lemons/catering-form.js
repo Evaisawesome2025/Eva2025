@@ -5,7 +5,7 @@
   "use strict";
 
   // ---- Config ---------------------------------------------------------------
-  var EMAIL = "hello@glenslemons.com"; // TODO: replace with the real inbox
+  var EMAIL = "glenandrea2007@gmail.com"; // where inquiries are sent
   var FORMSPREE_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — leave "" to use mailto
 
   // ---- Questions ------------------------------------------------------------
@@ -16,8 +16,9 @@
     { id: "occasion", type: "text", label: "What's the occasion?", placeholder: "Birthday, wedding, grad party, company picnic…" },
     { id: "guests", type: "choice", label: "About how many guests?", required: true,
       options: ["Up to 50", "Up to 75", "Up to 100", "More than 100"] },
-    { id: "date", type: "date", label: "When's the big day?", help: "Optional — a rough date is fine" },
-    { id: "location", type: "text", label: "Where's the event?", placeholder: "Park, venue, or address around Sioux Falls" },
+    { id: "date", type: "date", label: "When's the event?", help: "Pick the date you're planning for.", required: true },
+    { id: "time", type: "text", label: "What time should we set up?", placeholder: "e.g. 2:00 PM – 4:00 PM", help: "A rough window is fine." },
+    { id: "location", type: "text", label: "Where's the event?", placeholder: "Venue or address around Sioux Falls", required: true },
     { id: "notes", type: "textarea", label: "Anything else we should know?", placeholder: "Theme, timing, special requests…", help: "Optional" }
   ];
 

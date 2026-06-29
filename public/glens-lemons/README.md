@@ -49,7 +49,8 @@ GitHub Pages, Netlify, Cloudflare Pages, or an S3 bucket. No server needed.
 
 ## Customizing
 
-- **Contact email** — replace `hello@glenslemons.com` in `index.html`.
-- **Hours / location** — edit the "Find Us" section in `index.html`.
+- **Contact email** — set in `index.html` (mailto links) and as `EMAIL` in `catering-form.js`.
+- **Catering inquiry form** — questions live in the `QUESTIONS` array in `catering-form.js`. To collect inquiries without the visitor's email app, set `FORMSPREE_ENDPOINT` to a Formspree URL.
+- **Location** — edit the "Find Us" section in `index.html`.
 - **Prices / sizes** — edit the menu cards in `index.html`.
 - **Colors** — tweak the CSS variables at the top of `styles.css`.
