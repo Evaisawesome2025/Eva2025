@@ -15,6 +15,20 @@ const nextConfig = {
       ],
     };
   },
+  // Always revalidate the Glen's Lemons static files so visitors never get
+  // served a stale cached page after an update.
+  async headers() {
+    return [
+      {
+        source: "/glens-lemons/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
+      },
+      {
+        source: "/",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
