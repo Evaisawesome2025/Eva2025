@@ -224,10 +224,10 @@
         <p class="menu__note">
           Need more time? Add extra service hours for <strong>$75 each</strong>.
           Planning something bigger than 100 guests?
-          <a href="mailto:hello@glenslemons.com?subject=Glen's%20Lemons%20Catering%20Inquiry">Get in touch for a custom quote</a> — we'd love to pour for you.
+          <a href="mailto:hello@glenslemons.com?subject=Glen's%20Lemons%20Catering%20Inquiry" data-inquiry>Get in touch for a custom quote</a> — we'd love to pour for you.
         </p>
         <div class="catering__cta">
-          <a class="btn btn--primary" href="mailto:hello@glenslemons.com?subject=Glen's%20Lemons%20Catering%20Inquiry">Book Your Event</a>
+          <a class="btn btn--primary" href="mailto:hello@glenslemons.com?subject=Glen's%20Lemons%20Catering%20Inquiry" data-inquiry>Book Your Event</a>
         </div>
       </div>
     </section>
@@ -248,7 +248,7 @@
             <li><span aria-hidden="true">🗓️</span> Weekends &amp; sunny afternoons</li>
             <li><span aria-hidden="true">🌤️</span> Spring through fall</li>
           </ul>
-          <a class="btn btn--primary" href="mailto:hello@glenslemons.com">Book Us for an Event</a>
+          <a class="btn btn--primary" href="mailto:hello@glenslemons.com" data-inquiry>Book Us for an Event</a>
         </div>
         <div class="find-us__card">
           <h3>Catch Us Around Town</h3>
@@ -309,7 +309,25 @@
     <p class="footer__copy">© <span id="year"></span> Glen's Lemons. Made with 🍋 in Sioux Falls, South Dakota.</p>
   </footer>
 
+  <!-- ===== Catering inquiry (Typeform-style, one question at a time) ===== -->
+  <div class="inquiry" id="inquiry" hidden role="dialog" aria-modal="true" aria-label="Catering inquiry">
+    <div class="inquiry__backdrop" data-inquiry-close></div>
+    <div class="inquiry__panel" role="document">
+      <button class="inquiry__close" type="button" aria-label="Close" data-inquiry-close>&times;</button>
+      <div class="inquiry__progress" aria-hidden="true"><span class="inquiry__bar" id="inquiry-bar"></span></div>
+      <form class="inquiry__form" id="inquiry-form" novalidate>
+        <div class="inquiry__stage" id="inquiry-stage" aria-live="polite"></div>
+        <div class="inquiry__nav">
+          <button class="btn btn--ghost inquiry__back" type="button" id="inquiry-back">Back</button>
+          <button class="btn btn--primary inquiry__next" type="submit" id="inquiry-next">Next</button>
+        </div>
+        <p class="inquiry__hint" id="inquiry-hint">press <strong>Enter ↵</strong></p>
+      </form>
+    </div>
+  </div>
+
   <script src="/glens-lemons/script.js"></script>
+  <script src="/glens-lemons/catering-form.js"></script>
   <!-- Privacy-friendly Vercel Web Analytics. Enable it in your Vercel project
        dashboard (Analytics tab); until then this script simply does nothing. -->
   <script defer src="/_vercel/insights/script.js"></script>
