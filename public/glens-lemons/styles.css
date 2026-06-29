@@ -313,6 +313,21 @@ a { color: inherit; }
 }
 .menu-card__desc { color: var(--ink-soft); margin-top: 0.5rem; font-size: 0.95rem; }
 .menu__note { text-align: center; margin-top: 2.25rem; font-weight: 700; }
+.menu__note a { color: var(--lemon-deep); text-decoration: underline; }
+
+/* ===== Catering ===== */
+.catering { background: var(--cream); }
+.catering__includes {
+  text-align: center;
+  margin: 2.25rem auto 0;
+  max-width: 640px;
+  background: var(--white);
+  border: 2px dashed var(--lemon-deep);
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  font-size: 1.02rem;
+}
+.catering__cta { text-align: center; margin-top: 1.75rem; }
 
 /* ===== Find Us ===== */
 .find-us { background: var(--cream); }
