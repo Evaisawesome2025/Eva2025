@@ -135,13 +135,19 @@ a { color: inherit; }
   align-items: center;
   gap: 1.75rem;
   list-style: none;
+  margin-left: auto;
 }
-.nav__menu a {
+.nav__menu a:not(.btn) {
   text-decoration: none;
   font-weight: 700;
   color: var(--ink);
 }
 .nav__menu a:not(.btn):hover { color: var(--ink-soft); }
+
+/* Right-side group: persistent Catering Inquiry button + mobile toggle */
+.nav__right { display: flex; align-items: center; gap: 0.75rem; }
+.nav__inquiry { white-space: nowrap; }
+.nav__inquiry-short { display: none; }
 
 .nav__toggle {
   display: none;
@@ -433,6 +439,7 @@ a { color: inherit; }
     top: 100%;
     left: 0;
     right: 0;
+    margin-left: 0;
     flex-direction: column;
     gap: 0;
     background: var(--lemon);
@@ -444,7 +451,6 @@ a { color: inherit; }
   .nav__menu.open { max-height: 360px; }
   .nav__menu li { width: 100%; text-align: center; }
   .nav__menu li a { display: block; padding: 0.9rem; }
-  .nav__menu .btn--small { margin: 0.5rem auto 1rem; display: inline-block; }
 
   .footer__contact { text-align: left; }
   .social { justify-content: flex-start; }
@@ -573,6 +579,14 @@ textarea.inquiry__input { resize: vertical; }
 @media (max-width: 560px) {
   .inquiry__panel { padding: 2.25rem 1.25rem 1.5rem; }
   .inquiry__label { font-size: 1.3rem; }
+}
+
+/* Narrow phones: shorten the header button label so it fits the top bar */
+@media (max-width: 480px) {
+  .nav__inquiry-full { display: none; }
+  .nav__inquiry-short { display: inline; }
+  .brand { font-size: 1.15rem; }
+  .brand__logo { width: 40px; height: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

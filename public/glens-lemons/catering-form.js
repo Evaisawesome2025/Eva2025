@@ -1,12 +1,16 @@
 // Glen's Lemons — catering inquiry flow (Typeform-style, one question at a time).
-// No dependencies. Submits via mailto by default; set FORMSPREE_ENDPOINT to a
-// Formspree (or similar) URL to collect inquiries without the visitor's email app.
+// No dependencies. Inquiries are emailed via FormSubmit (no account/API key);
+// if that request fails, it falls back to opening the visitor's email app.
 (function () {
   "use strict";
 
   // ---- Config ---------------------------------------------------------------
   var EMAIL = "glenandrea2007@gmail.com"; // where inquiries are sent
-  var FORMSPREE_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — leave "" to use mailto
+  // Inquiries are delivered server-side via FormSubmit (no account/API key).
+  // The first submission triggers a one-time confirmation email to EMAIL —
+  // click that link once and every future inquiry arrives automatically.
+  // If the request ever fails, we fall back to opening the visitor's email app.
+  var SUBMIT_ENDPOINT = "https://formsubmit.co/ajax/" + EMAIL;
 
   // ---- Questions ------------------------------------------------------------
   var QUESTIONS = [
@@ -127,6 +131,25 @@
     return lines.join("\n");
   }
 
+  // Readable payload for FormSubmit. A lowercase "email" field makes the
+  // confirmation email reply straight to the customer.
+  function buildPayload() {
+    return {
+      Name: answers.name || "",
+      email: answers.email || "",
+      Phone: answers.phone || "",
+      Occasion: answers.occasion || "",
+      Guests: answers.guests || "",
+      "Event date": answers.date || "",
+      "Setup time": answers.time || "",
+      Location: answers.location || "",
+      Notes: answers.notes || "",
+      _subject: "New catering inquiry" + (answers.occasion ? " — " + answers.occasion : ""),
+      _template: "table",
+      _captcha: "false"
+    };
+  }
+
   function showThanks(viaMailto) {
     bar.style.width = "100%";
     var extra = viaMailto
@@ -144,17 +167,27 @@
   }
 
   function submit() {
-    if (FORMSPREE_ENDPOINT) {
+    if (SUBMIT_ENDPOINT) {
       nextBtn.disabled = true;
       nextBtn.textContent = "Sending…";
-      fetch(FORMSPREE_ENDPOINT, {
+      fetch(SUBMIT_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(answers)
+        body: JSON.stringify(buildPayload())
       })
-        .then(function () { showThanks(false); })
-        .catch(function () { sendMailto(); showThanks(true); })
-        .then(function () { nextBtn.disabled = false; });
+        .then(function (res) {
+          if (!res.ok) throw new Error("Bad response");
+          showThanks(false);
+        })
+        .catch(function () {
+          // Network/endpoint failure — fall back to the visitor's email app.
+          sendMailto();
+          showThanks(true);
+        })
+        .then(function () {
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Send inquiry 🍋";
+        });
     } else {
       sendMailto();
       showThanks(true);
