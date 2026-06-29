@@ -122,7 +122,6 @@ a { color: inherit; }
   font-weight: 800;
   font-size: 1.35rem;
 }
-.brand__icon { font-size: 1.5rem; }
 .brand__logo {
   width: 48px;
   height: 48px;
@@ -389,6 +388,25 @@ a { color: inherit; }
 .footer__contact a { color: var(--lemon); font-weight: 700; text-decoration: none; }
 .footer__contact a:hover { text-decoration: underline; }
 .footer__small { color: rgba(255, 253, 243, 0.7); font-size: 0.9rem; margin-top: 0.4rem; }
+.social {
+  list-style: none;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+.social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 253, 243, 0.12);
+  color: var(--lemon);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.social a:hover { background: var(--lemon); color: var(--ink); transform: translateY(-2px); }
 .footer__copy { text-align: center; color: rgba(255, 253, 243, 0.6); font-size: 0.85rem; margin-top: 1.5rem; }
 
 /* ===== Responsive ===== */
@@ -422,6 +440,7 @@ a { color: inherit; }
   .nav__menu .btn--small { margin: 0.5rem auto 1rem; display: inline-block; }
 
   .footer__contact { text-align: left; }
+  .social { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
