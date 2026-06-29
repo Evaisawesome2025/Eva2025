@@ -354,16 +354,8 @@ a { color: inherit; }
   box-shadow: var(--shadow);
 }
 .find-us__card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
-.hours { list-style: none; display: grid; gap: 0.6rem; }
-.hours li {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 700;
-  padding-bottom: 0.6rem;
-  border-bottom: 2px dashed rgba(58, 46, 18, 0.18);
-}
-.hours li:last-child { border-bottom: 0; }
-.find-us__weather { margin-top: 1.25rem; font-weight: 700; font-size: 0.95rem; }
+.find-us__card-text { color: var(--ink); font-weight: 600; margin-bottom: 1rem; }
+.find-us__card .btn { margin-top: 0.5rem; }
 
 /* ===== CTA ===== */
 .cta {
