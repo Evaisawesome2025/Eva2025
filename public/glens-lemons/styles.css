@@ -687,6 +687,99 @@ textarea.inquiry__input { resize: vertical; }
   .brand__logo { width: 40px; height: 40px; }
 }
 
+/* ===== Playful extras ===== */
+.fun-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200; }
+.fun-confetti span {
+  position: fixed;
+  will-change: transform, opacity;
+  animation: funBurst 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes funBurst {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+}
+.fun-rain { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 200; }
+.fun-rain span { position: absolute; top: -48px; animation: funFall linear forwards; }
+@keyframes funFall { to { transform: translateY(112vh) rotate(360deg); } }
+
+.mascot-hint {
+  position: absolute;
+  bottom: 6%;
+  right: 4%;
+  background: var(--ink);
+  color: var(--lemon);
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  animation: hintBob 1.4s ease-in-out infinite;
+  z-index: 6;
+  white-space: nowrap;
+}
+@keyframes hintBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+.mascot-wiggle { animation: mascotWiggle 0.5s ease; }
+@keyframes mascotWiggle {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-6deg) scale(1.03); }
+  40% { transform: rotate(5deg); }
+  60% { transform: rotate(-3deg); }
+  80% { transform: rotate(2deg); }
+}
+
+.mascot-bubble {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translate(-50%, -100%) scale(0.85);
+  z-index: 60;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0.6rem 1rem;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  max-width: 250px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow);
+}
+.mascot-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: var(--ink);
+  border-bottom: 0;
+}
+.mascot-bubble.show { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+
+.fun-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: var(--lemon);
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 800;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  z-index: 210;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fun-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; scroll-behavior: auto !important; }
+  .mascot-hint { display: none; }
 }

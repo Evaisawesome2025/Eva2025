@@ -235,6 +235,7 @@
     animateStage();
     form.querySelector(".inquiry__nav").style.display = "none";
     hint.style.display = "none";
+    if (window.GlensFun && window.GlensFun.celebrate) window.GlensFun.celebrate();
   }
 
   function submit() {
