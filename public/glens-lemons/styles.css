@@ -45,6 +45,8 @@ a { color: inherit; }
 }
 
 .section { padding: 5rem 0; }
+/* Keep anchored sections clear of the sticky header when nav links are clicked */
+[id] { scroll-margin-top: 92px; }
 
 .eyebrow {
   text-transform: uppercase;
@@ -210,6 +212,7 @@ a { color: inherit; }
   width: 100%;
   max-width: 420px;
   height: auto;
+  border-radius: 28px;
   filter: drop-shadow(0 16px 28px rgba(120, 90, 0, 0.28));
   animation: float 5s ease-in-out infinite;
 }
@@ -444,6 +447,7 @@ a { color: inherit; }
 .footer__contact a { color: var(--lemon); font-weight: 700; text-decoration: none; }
 .footer__contact a:hover { text-decoration: underline; }
 .footer__small { color: rgba(255, 253, 243, 0.7); font-size: 0.9rem; margin-top: 0.4rem; }
+.social[hidden] { display: none; }
 .social {
   list-style: none;
   display: flex;
