@@ -53,7 +53,21 @@
     "Rub a lemon on a cutting board to freshen it right up.",
     "The lemon first grew in Asia thousands of years ago.",
     "Lemon + baking soda makes a fizzy little science experiment.",
-    "It takes about 5 lemons to make one big glass of lemonade. 🍋"
+    "It takes about 5 lemons to make one big glass of lemonade. 🍋",
+    "The word \"lemon\" comes from the Persian word \"līmūn\".",
+    "A lemon is about as acidic as vinegar — pH around 2!",
+    "Meyer lemons are a sweet cross between a lemon and a mandarin.",
+    "Lemon trees can flower and grow fruit at the same time.",
+    "The average lemon holds about 3 tablespoons of juice.",
+    "Most of a lemon's aroma lives in the oils of its zest.",
+    "California and Arizona grow most of the lemons in the U.S.",
+    "A squeeze of lemon keeps sliced apples from turning brown.",
+    "A healthy lemon tree can keep producing for over 50 years.",
+    "Menton, France throws a giant Lemon Festival every winter.",
+    "Just a whiff of fresh lemon can give your mood a little lift.",
+    "Roll a lemon on the counter before juicing to get more out of it.",
+    "Bees love lemon blossoms — every tree helps the pollinators.",
+    "Lemon trees are evergreen — they stay green all year long."
   ];
   var factEl = document.getElementById("lemon-fact");
   var factBtn = document.getElementById("lemon-fact-btn");
