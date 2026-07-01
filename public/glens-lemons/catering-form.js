@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   // ---- Config ---------------------------------------------------------------
   var EMAIL = "glenandrea2007@gmail.com"; // where inquiries are sent
   // Inquiries are delivered server-side via FormSubmit (no account/API key).
@@ -25,12 +27,16 @@
     { id: "name", type: "text", label: "First things first — who are we pouring for?", placeholder: "Your name", required: true },
     { id: "email", type: "email", label: "What's the best email to reach you?", placeholder: "you@example.com", required: true },
     { id: "phone", type: "tel", label: "A phone number, in case it's easier?", placeholder: "(605) 555-0123", help: "Optional" },
-    { id: "occasion", type: "text", label: "What's the occasion?", placeholder: "Birthday, wedding, grad party, company picnic…" },
+    { id: "occasion", type: "choice", label: "What's the occasion?",
+      otherOption: "✨ Something else", otherPlaceholder: "Tell us about your event…",
+      options: ["🎂 Birthday party", "🎓 Graduation", "💍 Wedding", "🏢 Company event", "🎪 Community event", "✨ Something else"] },
     { id: "guests", type: "choice", label: "About how many guests?", required: true,
       options: ["Up to 50", "Up to 75", "Up to 100", "More than 100"] },
     { id: "date", type: "date", label: "When's the event?", help: "Pick the date you're planning for.", required: true },
-    { id: "time", type: "text", label: "What time should we set up?", placeholder: "e.g. 2:00 PM – 4:00 PM", help: "A rough window is fine." },
-    { id: "location", type: "text", label: "Where's the event?", placeholder: "Venue or address around Sioux Falls", required: true },
+    { id: "time", type: "choice", label: "What time works best?", help: "A rough window — we'll fine-tune together.",
+      options: ["🌅 Morning (9–12)", "☀️ Early afternoon (12–3)", "🌤️ Late afternoon (3–6)", "🌇 Evening (6–9)", "🤷 Not sure yet"] },
+    { id: "location", type: "text", label: "Where's the event?", placeholder: "Start typing an address or venue…",
+      suggest: true, help: "Pick a suggestion or just type it.", required: true },
     { id: "notes", type: "textarea", label: "Anything else we should know?", placeholder: "Theme, timing, special requests…", help: "Optional" }
   ];
   var REVIEW = QUESTIONS.length; // the step index of the review screen
@@ -46,6 +52,7 @@
   var hint = document.getElementById("inquiry-hint");
 
   var answers = {};
+  var otherMode = {}; // per-question: "Something else" chosen → show a text box
   var step = 0;
   var lastFocused = null;
 
@@ -93,7 +100,10 @@
     html += '<label class="inquiry__label" for="inquiry-input">' + q.label + "</label>";
     if (q.help) html += '<p class="inquiry__help">' + q.help + "</p>";
 
-    if (q.type === "choice") {
+    var isOther = q.type === "choice" && q.otherOption && otherMode[q.id];
+    var showChoices = q.type === "choice" && !isOther;
+
+    if (showChoices) {
       html += '<div class="inquiry__choices">';
       q.options.forEach(function (opt, i) {
         var sel = current === opt ? " is-selected" : "";
@@ -104,14 +114,18 @@
     } else if (q.type === "textarea") {
       html += '<textarea class="inquiry__input" id="inquiry-input" rows="3" placeholder="' + esc(q.placeholder || "") + '">' + esc(current) + "</textarea>";
     } else {
-      var min = q.type === "date" ? ' min="' + todayISO() + '"' : "";
+      var inputType = isOther ? "text" : q.type;
+      var min = inputType === "date" ? ' min="' + todayISO() + '"' : "";
       // Autofill + mobile keyboard hints so phones can one-tap fill these.
       var attrs = "";
       if (q.id === "name") attrs = ' autocomplete="name" autocapitalize="words"';
-      else if (q.type === "email") attrs = ' autocomplete="email" inputmode="email"';
-      else if (q.type === "tel") attrs = ' autocomplete="tel" inputmode="tel"';
-      html += '<input class="inquiry__input" id="inquiry-input" type="' + q.type + '"' + min + attrs +
-        ' placeholder="' + esc(q.placeholder || "") + '" value="' + esc(current) + '" />';
+      else if (inputType === "email") attrs = ' autocomplete="email" inputmode="email"';
+      else if (inputType === "tel") attrs = ' autocomplete="tel" inputmode="tel"';
+      var ph = isOther ? (q.otherPlaceholder || "") : (q.placeholder || "");
+      var val = isOther && q.options && q.options.indexOf(current) >= 0 ? "" : current;
+      html += '<input class="inquiry__input" id="inquiry-input" type="' + inputType + '"' + min + attrs +
+        ' placeholder="' + esc(ph) + '" value="' + esc(val) + '" />';
+      if (isOther) html += '<button type="button" class="inquiry__choices-back" id="inquiry-choices-back">← Back to the list</button>';
     }
     html += '<p class="inquiry__error" id="inquiry-error" role="alert"></p>';
     stage.innerHTML = html;
@@ -119,17 +133,13 @@
 
     backBtn.style.visibility = step === 0 ? "hidden" : "visible";
     nextBtn.textContent = step === QUESTIONS.length - 1 ? "Review" : "Next";
-    hint.style.display = q.type === "choice" ? "none" : "block";
+    hint.style.display = showChoices ? "none" : "block";
     setProgress();
 
-    if (q.type === "choice") {
+    if (showChoices) {
       Array.prototype.forEach.call(stage.querySelectorAll(".inquiry__choice"), function (b) {
         b.addEventListener("click", function () {
-          answers[q.id] = b.getAttribute("data-choice");
-          if (reduce) { advance(); return; }
-          // A quick squish so the tap feels juicy before advancing.
-          b.classList.add("is-picked");
-          setTimeout(advance, 160);
+          pickChoice(q, b.getAttribute("data-choice"), b);
         });
       });
     } else {
@@ -140,8 +150,76 @@
           var err = document.getElementById("inquiry-error");
           if (err) err.textContent = "";
         });
+        if (q.suggest) attachPlaceSuggest(input);
       }
+      var backToChoices = document.getElementById("inquiry-choices-back");
+      if (backToChoices) backToChoices.addEventListener("click", function () {
+        otherMode[q.id] = false;
+        render();
+      });
     }
+  }
+
+  // Choosing an option advances; choosing the "other" option opens a text box.
+  function pickChoice(q, val, btn) {
+    if (q.otherOption && val === q.otherOption) {
+      otherMode[q.id] = true;
+      render();
+      return;
+    }
+    answers[q.id] = val;
+    otherMode[q.id] = false;
+    if (reduce || !btn) { advance(); return; }
+    // A quick squish so the tap feels juicy before advancing.
+    btn.classList.add("is-picked");
+    setTimeout(advance, 160);
+  }
+
+  // Lightweight place autocomplete for the location question. Uses the free
+  // OpenStreetMap-based Photon API (no key needed), biased to Sioux Falls.
+  // If the request fails the input still works as plain text.
+  function attachPlaceSuggest(input) {
+    var box = document.createElement("div");
+    box.className = "inquiry__suggest";
+    box.hidden = true;
+    input.insertAdjacentElement("afterend", box);
+    var timer, controller;
+    function clear() { box.innerHTML = ""; box.hidden = true; }
+    input.addEventListener("input", function () {
+      clearTimeout(timer);
+      var qtext = input.value.trim();
+      if (qtext.length < 3) { clear(); return; }
+      timer = setTimeout(function () {
+        if (controller && controller.abort) controller.abort();
+        controller = window.AbortController ? new AbortController() : null;
+        fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(qtext) +
+              "&limit=4&lang=en&lat=43.5446&lon=-96.7311",
+              controller ? { signal: controller.signal } : {})
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var feats = (data.features || []).slice(0, 4);
+            box.innerHTML = "";
+            feats.forEach(function (f) {
+              var p = f.properties || {};
+              var main = p.name || [p.street, p.housenumber].filter(Boolean).join(" ");
+              if (!main) return;
+              var sub = [p.city || p.county, p.state].filter(Boolean).join(", ");
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "inquiry__suggest-item";
+              b.innerHTML = '📍 <span>' + esc(main) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "");
+              b.addEventListener("click", function () {
+                input.value = main + (sub ? ", " + sub : "");
+                clear();
+                input.focus();
+              });
+              box.appendChild(b);
+            });
+            box.hidden = box.children.length === 0;
+          })
+          .catch(function () { clear(); });
+      }, 250);
+    });
   }
 
   function renderReview() {
@@ -179,7 +257,7 @@
   function validateCurrent() {
     var q = QUESTIONS[step];
     var err = document.getElementById("inquiry-error");
-    if (q.type === "choice") {
+    if (q.type === "choice" && !(q.otherOption && otherMode[q.id])) {
       if (q.required && !answers[q.id]) { if (err) err.textContent = "Please pick one."; return false; }
       return true;
     }
@@ -285,6 +363,7 @@
   function open() {
     lastFocused = document.activeElement;
     answers = {};
+    otherMode = {};
     step = 0;
     root.hidden = false;
     document.body.style.overflow = "hidden";
@@ -323,14 +402,11 @@
   document.addEventListener("keydown", function (e) {
     if (root.hidden) return;
     if (e.key === "Escape") { close(); return; }
-    // Number keys pick an option on choice questions.
-    if (step < REVIEW && QUESTIONS[step].type === "choice" && /^[1-9]$/.test(e.key)) {
-      var opts = QUESTIONS[step].options;
+    // Number keys pick an option on choice questions (not while typing "other").
+    var kq = step < REVIEW ? QUESTIONS[step] : null;
+    if (kq && kq.type === "choice" && !(kq.otherOption && otherMode[kq.id]) && /^[1-9]$/.test(e.key)) {
       var idx = parseInt(e.key, 10) - 1;
-      if (idx < opts.length) {
-        answers[QUESTIONS[step].id] = opts[idx];
-        advance();
-      }
+      if (idx < kq.options.length) pickChoice(kq, kq.options[idx], null);
     }
   });
 })();
