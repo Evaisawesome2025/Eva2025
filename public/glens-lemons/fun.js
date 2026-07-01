@@ -20,6 +20,57 @@
 
   function rand(n) { return Math.floor(Math.random() * n); }
 
+  // ---- "Lemons squeezed" counter (persists across visits) ------------------
+  var SQUEEZE_KEY = "glensLemonsSqueezed";
+  var countEl = document.getElementById("squeeze-count");
+  function readCount() {
+    try { return parseInt(localStorage.getItem(SQUEEZE_KEY) || "0", 10) || 0; }
+    catch (e) { return 0; }
+  }
+  function renderCount() { if (countEl) countEl.textContent = readCount().toLocaleString(); }
+  function bumpSqueeze(el, doBurst) {
+    var n = readCount() + 1;
+    try { localStorage.setItem(SQUEEZE_KEY, String(n)); } catch (e) {}
+    renderCount();
+    if (doBurst && el) {
+      var r = el.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 12);
+    }
+    return n;
+  }
+  renderCount();
+  var squeezeBtn = document.getElementById("squeeze-btn");
+  if (squeezeBtn) squeezeBtn.addEventListener("click", function () { bumpSqueeze(squeezeBtn, true); });
+
+  // ---- Lemon fact of the day -----------------------------------------------
+  var FACTS = [
+    "A single lemon tree can produce up to 600 lemons a year!",
+    "Lemons float in water because they're less dense than it.",
+    "Lemons are technically berries. Berry interesting!",
+    "One lemon has about a full day's worth of vitamin C.",
+    "Sailors once packed lemons on long voyages to fight scurvy.",
+    "Lemons only ripen on the tree — never after they're picked.",
+    "Rub a lemon on a cutting board to freshen it right up.",
+    "The lemon first grew in Asia thousands of years ago.",
+    "Lemon + baking soda makes a fizzy little science experiment.",
+    "It takes about 5 lemons to make one big glass of lemonade. 🍋"
+  ];
+  var factEl = document.getElementById("lemon-fact");
+  var factBtn = document.getElementById("lemon-fact-btn");
+  if (factEl) {
+    var factIdx = rand(FACTS.length);
+    function showFact() { factEl.textContent = FACTS[factIdx]; }
+    showFact();
+    if (factBtn) factBtn.addEventListener("click", function () {
+      factIdx = (factIdx + 1) % FACTS.length;
+      showFact();
+    });
+    if (!reduce) setInterval(function () {
+      factIdx = (factIdx + 1) % FACTS.length;
+      showFact();
+    }, 9000);
+  }
+
   // ---- Lemon confetti burst (viewport coords) ------------------------------
   function burst(x, y, count) {
     if (reduce) return;
@@ -100,7 +151,6 @@
     hint.setAttribute("aria-hidden", "true");
     art.appendChild(hint);
 
-    var squeezes = 0;
     var bubbleTimer;
     function showBubble(text) {
       bubble.textContent = text;
@@ -110,7 +160,7 @@
     }
 
     mascot.addEventListener("click", function () {
-      squeezes++;
+      var n = bumpSqueeze(mascot, false);
       if (hint) { hint.remove(); hint = null; }
       if (!reduce) {
         mascot.classList.remove("mascot-wiggle");
@@ -119,8 +169,8 @@
         var r = mascot.getBoundingClientRect();
         burst(r.left + r.width / 2, r.top + r.height * 0.4, 16);
       }
-      var msg = squeezes === 10
-        ? "10 squeezes?! You really love lemons. 🍋💛"
+      var msg = n % 25 === 0
+        ? ("Whoa — " + n.toLocaleString() + " lemons squeezed! 🍋💛")
         : PUNS[rand(PUNS.length)];
       showBubble(msg);
     });
