@@ -70,6 +70,8 @@
   function setProgress() {
     var pct = Math.round((step / (QUESTIONS.length + 1)) * 100);
     bar.style.width = pct + "%";
+    var lemon = document.getElementById("inquiry-lemon");
+    if (lemon) lemon.style.left = pct + "%";
   }
 
   // Re-trigger the slide-in animation each time the stage content changes.
@@ -103,7 +105,12 @@
       html += '<textarea class="inquiry__input" id="inquiry-input" rows="3" placeholder="' + esc(q.placeholder || "") + '">' + esc(current) + "</textarea>";
     } else {
       var min = q.type === "date" ? ' min="' + todayISO() + '"' : "";
-      html += '<input class="inquiry__input" id="inquiry-input" type="' + q.type + '"' + min +
+      // Autofill + mobile keyboard hints so phones can one-tap fill these.
+      var attrs = "";
+      if (q.id === "name") attrs = ' autocomplete="name" autocapitalize="words"';
+      else if (q.type === "email") attrs = ' autocomplete="email" inputmode="email"';
+      else if (q.type === "tel") attrs = ' autocomplete="tel" inputmode="tel"';
+      html += '<input class="inquiry__input" id="inquiry-input" type="' + q.type + '"' + min + attrs +
         ' placeholder="' + esc(q.placeholder || "") + '" value="' + esc(current) + '" />';
     }
     html += '<p class="inquiry__error" id="inquiry-error" role="alert"></p>';
@@ -119,7 +126,10 @@
       Array.prototype.forEach.call(stage.querySelectorAll(".inquiry__choice"), function (b) {
         b.addEventListener("click", function () {
           answers[q.id] = b.getAttribute("data-choice");
-          advance();
+          if (reduce) { advance(); return; }
+          // A quick squish so the tap feels juicy before advancing.
+          b.classList.add("is-picked");
+          setTimeout(advance, 160);
         });
       });
     } else {
