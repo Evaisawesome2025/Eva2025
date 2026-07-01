@@ -325,6 +325,7 @@ a { color: inherit; }
 }
 .menu-card__desc { color: var(--ink-soft); margin-top: 0.5rem; font-size: 0.95rem; }
 .menu__note { text-align: center; margin-top: 2.25rem; font-weight: 700; }
+.menu__note--pay + .menu__note { margin-top: 0.5rem; }
 .menu__note a { color: var(--lemon-deep); text-decoration: underline; }
 
 /* ===== Catering ===== */
