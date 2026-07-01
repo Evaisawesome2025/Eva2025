@@ -67,7 +67,10 @@
   <header class="site-header">
     <nav class="nav container" aria-label="Primary">
       <a class="brand" href="#top">
-        <img class="brand__logo" src="/glens-lemons/logo.png" alt="Glen's Lemons logo" width="48" height="48" />
+        <picture>
+          <source type="image/webp" srcset="/glens-lemons/logo.webp" />
+          <img class="brand__logo" src="/glens-lemons/logo.png" alt="Glen's Lemons logo" width="48" height="48" />
+        </picture>
         <span class="brand__name">Glen's Lemons</span>
       </a>
       <ul class="nav__menu" id="nav-menu">
@@ -111,14 +114,17 @@
           </ul>
         </div>
         <div class="hero__art">
-          <img
-            class="hero__logo"
-            src="/glens-lemons/logo.png"
-            alt="Glen's Lemons — Fresh Squeezed Fun! Sweet. Tart. Awesome!"
-            width="1254"
-            height="1254"
-            fetchpriority="high"
-          />
+          <picture>
+            <source type="image/webp" srcset="/glens-lemons/logo.webp" />
+            <img
+              class="hero__logo"
+              src="/glens-lemons/logo.png"
+              alt="Glen's Lemons — Fresh Squeezed Fun! Sweet. Tart. Awesome!"
+              width="800"
+              height="800"
+              fetchpriority="high"
+            />
+          </picture>
         </div>
       </div>
       <div class="wave" aria-hidden="true">
@@ -267,7 +273,46 @@
             🗓️ <strong>Every Thursday</strong><br />
             🕓 Starting at <strong>4:00 PM</strong>
           </p>
-          <a class="btn btn--dark" href="https://www.google.com/maps/search/?api=1&amp;query=Lake%20Lorraine%20Farmers%20Market%2C%20Sioux%20Falls%2C%20SD" target="_blank" rel="noopener">Get Directions</a>
+          <div class="find-us__card-actions">
+            <a class="btn btn--dark" href="https://www.google.com/maps/search/?api=1&amp;query=Lake%20Lorraine%20Farmers%20Market%2C%20Sioux%20Falls%2C%20SD" target="_blank" rel="noopener">Get Directions</a>
+            <a class="btn btn--ghost btn--on-lemon" href="/glens-lemons/market.ics" download="glens-lemons-market.ics">🗓️ Add to Calendar</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section id="faq" class="section faq">
+      <div class="container">
+        <div class="section__head">
+          <p class="eyebrow eyebrow--dark">Good to Know</p>
+          <h2>Frequently Asked Questions</h2>
+        </div>
+        <div class="faq__list">
+          <details class="faq__item">
+            <summary>What's actually in it?</summary>
+            <p>Three simple things: fresh-squeezed lemons, sugar, and water. Always hand-squeezed — never from a powder or mix.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Is it vegan and gluten-free?</summary>
+            <p>Yes! Water, sugar, and lemons are naturally vegan and gluten-free, with no artificial flavors, colors, or preservatives.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Where can I find you?</summary>
+            <p>At the <strong>Lake Lorraine Farmers Market</strong> in Sioux Falls, SD — every <strong>Thursday starting at 4:00 PM</strong>. Look for the lemon-yellow stand!</p>
+          </details>
+          <details class="faq__item">
+            <summary>What sizes do you offer?</summary>
+            <p>One size, done right: a full <strong>24 oz</strong> cup of fresh squeezed lemonade for <strong>$6</strong>.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Do you cater events?</summary>
+            <p>Absolutely — birthdays, weddings, graduation parties, company picnics, and more. Check out our <a href="#catering">catering packages</a>, or tap <strong>Inquire About Catering</strong> to send us the details.</p>
+          </details>
+          <details class="faq__item">
+            <summary>How far ahead should I book catering?</summary>
+            <p>The sooner the better, especially for busy summer weekends. Reach out as soon as you have a date and we'll lock it in.</p>
+          </details>
         </div>
       </div>
     </section>
@@ -286,7 +331,10 @@
   <footer class="site-footer">
     <div class="container footer__inner">
       <div class="footer__brand">
-        <img class="footer__logo" src="/glens-lemons/logo.png" alt="Glen's Lemons logo" width="72" height="72" />
+        <picture>
+          <source type="image/webp" srcset="/glens-lemons/logo.webp" />
+          <img class="footer__logo" src="/glens-lemons/logo.png" alt="Glen's Lemons logo" width="72" height="72" />
+        </picture>
         <span class="brand__name">Glen's Lemons</span>
         <p class="footer__tag">Fresh Squeezed Lemonade · Sioux Falls, SD</p>
       </div>
