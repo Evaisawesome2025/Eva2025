@@ -779,6 +779,48 @@ textarea.inquiry__input { resize: vertical; }
 }
 .fun-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* Spinning lemon (loading touch) */
+.spin-lemon { display: inline-block; animation: spinLemon 0.8s linear infinite; }
+@keyframes spinLemon { to { transform: rotate(360deg); } }
+
+/* "Lemons squeezed" chip in the hero badges */
+.hero__squeeze {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid rgba(58, 46, 18, 0.25);
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.hero__squeeze:hover { background: rgba(255, 255, 255, 0.6); }
+.hero__squeeze:active { transform: scale(0.94); }
+.hero__squeeze strong { color: var(--lemon-deep); }
+
+/* Lemon Fact of the Day band */
+.lemon-fact { background: var(--ink); color: var(--cream); padding: 1.25rem 0; }
+.lemon-fact__inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.lemon-fact__icon { font-size: 2rem; flex-shrink: 0; animation: hintBob 2.5s ease-in-out infinite; }
+.lemon-fact__body { flex: 1; min-width: 200px; }
+.lemon-fact__label {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--lemon);
+  margin-bottom: 0.15rem;
+}
+.lemon-fact__text { font-family: "Baloo 2", sans-serif; font-weight: 600; font-size: 1.1rem; color: var(--cream); }
+.lemon-fact__btn { flex-shrink: 0; background: var(--lemon); color: var(--ink); }
+.lemon-fact__btn:hover { background: var(--lemon-deep); }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; scroll-behavior: auto !important; }
   .mascot-hint { display: none; }

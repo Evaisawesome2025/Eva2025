@@ -241,7 +241,7 @@
   function submit() {
     if (SUBMIT_ENDPOINT) {
       nextBtn.disabled = true;
-      nextBtn.textContent = "Sending…";
+      nextBtn.innerHTML = '<span class="spin-lemon" aria-hidden="true">🍋</span> Sending…';
       fetch(SUBMIT_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },

@@ -111,6 +111,11 @@
             <li>🍋 Always hand-squeezed</li>
             <li>❄️ Served ice-cold</li>
             <li>💛 Family made</li>
+            <li>
+              <button class="hero__squeeze" id="squeeze-btn" type="button" aria-label="Squeeze a lemon">
+                🍋 Lemons squeezed: <strong id="squeeze-count">0</strong>
+              </button>
+            </li>
           </ul>
         </div>
         <div class="hero__art">
@@ -169,6 +174,18 @@
             <p>Real lemons, squeezed fresh by hand every batch.</p>
           </li>
         </ul>
+      </div>
+    </section>
+
+    <!-- ===== Lemon Fact of the Day ===== -->
+    <section class="lemon-fact" aria-label="Lemon fact of the day">
+      <div class="container lemon-fact__inner">
+        <span class="lemon-fact__icon" aria-hidden="true">🍋</span>
+        <div class="lemon-fact__body">
+          <p class="lemon-fact__label">Lemon Fact of the Day</p>
+          <p class="lemon-fact__text" id="lemon-fact">Loading a juicy fact…</p>
+        </div>
+        <button class="btn btn--small lemon-fact__btn" id="lemon-fact-btn" type="button">Another 🍋</button>
       </div>
     </section>
 
