@@ -568,6 +568,63 @@ textarea.inquiry__input { resize: vertical; }
 }
 .inquiry__choice:hover { border-color: var(--lemon-deep); transform: translateX(3px); }
 .inquiry__choice.is-selected { border-color: var(--lemon-deep); background: var(--cream-2); }
+.inquiry__choice-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.6rem;
+  border-radius: 6px;
+  background: var(--cream-2);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.inquiry__choice:hover .inquiry__choice-key,
+.inquiry__choice.is-selected .inquiry__choice-key { background: var(--lemon); color: var(--ink); }
+
+/* Step transition */
+.inquiry__stage.is-anim { animation: inquiryStep 0.28s ease; }
+@keyframes inquiryStep {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Review screen */
+.inquiry__pkg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  background: linear-gradient(180deg, #fffdf0, #fff7cf);
+  border: 2px solid var(--lemon-deep);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  margin: 0.5rem 0 1rem;
+}
+.inquiry__pkg-tag {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--lemon-deep);
+}
+.inquiry__pkg-name { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 1.15rem; }
+.inquiry__pkg-price { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--lemon-deep); line-height: 1.1; }
+.inquiry__pkg-detail { color: var(--ink-soft); font-size: 0.82rem; }
+.inquiry__review { display: grid; gap: 0.1rem; }
+.inquiry__review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.15rem;
+  border-bottom: 1px dashed rgba(58, 46, 18, 0.15);
+  font-size: 0.95rem;
+}
+.inquiry__review-row:last-child { border-bottom: 0; }
+.inquiry__review-row .k { color: var(--ink-soft); font-weight: 700; flex-shrink: 0; }
+.inquiry__review-row .v { text-align: right; word-break: break-word; }
 .inquiry__error { color: #c0392b; font-size: 0.9rem; font-weight: 700; min-height: 1.2em; margin-top: 0.5rem; }
 .inquiry__nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
 .inquiry__nav .inquiry__next { margin-left: auto; }

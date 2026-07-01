@@ -12,6 +12,14 @@
   // If the request ever fails, we fall back to opening the visitor's email app.
   var SUBMIT_ENDPOINT = "https://formsubmit.co/ajax/" + EMAIL;
 
+  // Guest count → matching catering package (mirrors the Catering section).
+  var PACKAGES = {
+    "Up to 50": { name: "The Get-Together", price: "$375", detail: "up to 50 guests · 2 hours" },
+    "Up to 75": { name: "The Block Party", price: "$495", detail: "up to 75 guests · 2 hours" },
+    "Up to 100": { name: "The Big Bash", price: "$650", detail: "up to 100 guests · 3 hours" },
+    "More than 100": { name: "Custom event", price: "Custom quote", detail: "we'll price it just for you" }
+  };
+
   // ---- Questions ------------------------------------------------------------
   var QUESTIONS = [
     { id: "name", type: "text", label: "First things first — who are we pouring for?", placeholder: "Your name", required: true },
@@ -25,6 +33,7 @@
     { id: "location", type: "text", label: "Where's the event?", placeholder: "Venue or address around Sioux Falls", required: true },
     { id: "notes", type: "textarea", label: "Anything else we should know?", placeholder: "Theme, timing, special requests…", help: "Optional" }
   ];
+  var REVIEW = QUESTIONS.length; // the step index of the review screen
 
   // ---- Elements -------------------------------------------------------------
   var root = document.getElementById("inquiry");
@@ -45,12 +54,37 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
 
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function todayISO() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+
   function setProgress() {
-    var pct = Math.round((step / QUESTIONS.length) * 100);
+    var pct = Math.round((step / (QUESTIONS.length + 1)) * 100);
     bar.style.width = pct + "%";
   }
 
+  // Re-trigger the slide-in animation each time the stage content changes.
+  function animateStage() {
+    stage.classList.remove("is-anim");
+    void stage.offsetWidth; // reflow
+    stage.classList.add("is-anim");
+  }
+
   function render() {
+    if (step >= REVIEW) return renderReview();
+    renderQuestion();
+  }
+
+  function renderQuestion() {
     var q = QUESTIONS[step];
     var current = answers[q.id] || "";
     var html = '<p class="inquiry__step">Question ' + (step + 1) + " of " + QUESTIONS.length + "</p>";
@@ -59,26 +93,28 @@
 
     if (q.type === "choice") {
       html += '<div class="inquiry__choices">';
-      q.options.forEach(function (opt) {
+      q.options.forEach(function (opt, i) {
         var sel = current === opt ? " is-selected" : "";
-        html += '<button type="button" class="inquiry__choice' + sel + '" data-choice="' + opt + '">' + opt + "</button>";
+        html += '<button type="button" class="inquiry__choice' + sel + '" data-choice="' + esc(opt) + '">' +
+          '<span class="inquiry__choice-key">' + (i + 1) + "</span>" + esc(opt) + "</button>";
       });
       html += "</div>";
     } else if (q.type === "textarea") {
-      html += '<textarea class="inquiry__input" id="inquiry-input" rows="3" placeholder="' + (q.placeholder || "") + '">' + current + "</textarea>";
+      html += '<textarea class="inquiry__input" id="inquiry-input" rows="3" placeholder="' + esc(q.placeholder || "") + '">' + esc(current) + "</textarea>";
     } else {
-      html += '<input class="inquiry__input" id="inquiry-input" type="' + q.type + '" placeholder="' + (q.placeholder || "") + '" value="' + current.replace(/"/g, "&quot;") + '" />';
+      var min = q.type === "date" ? ' min="' + todayISO() + '"' : "";
+      html += '<input class="inquiry__input" id="inquiry-input" type="' + q.type + '"' + min +
+        ' placeholder="' + esc(q.placeholder || "") + '" value="' + esc(current) + '" />';
     }
     html += '<p class="inquiry__error" id="inquiry-error" role="alert"></p>';
     stage.innerHTML = html;
+    animateStage();
 
-    // Nav state
     backBtn.style.visibility = step === 0 ? "hidden" : "visible";
-    nextBtn.textContent = step === QUESTIONS.length - 1 ? "Send inquiry 🍋" : "Next";
+    nextBtn.textContent = step === QUESTIONS.length - 1 ? "Review" : "Next";
     hint.style.display = q.type === "choice" ? "none" : "block";
     setProgress();
 
-    // Choice buttons advance on click
     if (q.type === "choice") {
       Array.prototype.forEach.call(stage.querySelectorAll(".inquiry__choice"), function (b) {
         b.addEventListener("click", function () {
@@ -89,13 +125,45 @@
     } else {
       var input = document.getElementById("inquiry-input");
       if (input) {
-        setTimeout(function () { input.focus(); }, 50);
+        setTimeout(function () { input.focus(); }, 60);
         input.addEventListener("input", function () {
           var err = document.getElementById("inquiry-error");
           if (err) err.textContent = "";
         });
       }
     }
+  }
+
+  function renderReview() {
+    var pkg = PACKAGES[answers.guests];
+    var fields = [
+      ["Name", answers.name], ["Email", answers.email], ["Phone", answers.phone],
+      ["Occasion", answers.occasion], ["Guests", answers.guests],
+      ["Date", answers.date], ["Setup time", answers.time],
+      ["Location", answers.location], ["Notes", answers.notes]
+    ];
+    var rows = "";
+    fields.forEach(function (f) {
+      if (f[1]) rows += '<div class="inquiry__review-row"><span class="k">' + f[0] + '</span><span class="v">' + esc(f[1]) + "</span></div>";
+    });
+    var pkgHtml = pkg
+      ? '<div class="inquiry__pkg"><span class="inquiry__pkg-tag">Best fit</span>' +
+        '<span class="inquiry__pkg-name">' + pkg.name + "</span>" +
+        '<span class="inquiry__pkg-price">' + pkg.price + "</span>" +
+        '<span class="inquiry__pkg-detail">' + pkg.detail + "</span></div>"
+      : "";
+
+    stage.innerHTML =
+      '<p class="inquiry__step">Almost there — quick review</p>' +
+      '<label class="inquiry__label">Does everything look right?</label>' +
+      pkgHtml +
+      '<div class="inquiry__review">' + rows + "</div>";
+    animateStage();
+
+    backBtn.style.visibility = "visible";
+    nextBtn.textContent = "Send inquiry 🍋";
+    hint.style.display = "none";
+    setProgress();
   }
 
   function validateCurrent() {
@@ -114,12 +182,7 @@
   }
 
   function advance() {
-    if (step < QUESTIONS.length - 1) {
-      step++;
-      render();
-    } else {
-      submit();
-    }
+    if (step < REVIEW) { step++; render(); }
   }
 
   function buildSummary() {
@@ -134,12 +197,14 @@
   // Readable payload for FormSubmit. A lowercase "email" field makes the
   // confirmation email reply straight to the customer.
   function buildPayload() {
+    var pkg = PACKAGES[answers.guests];
     return {
       Name: answers.name || "",
       email: answers.email || "",
       Phone: answers.phone || "",
       Occasion: answers.occasion || "",
       Guests: answers.guests || "",
+      "Suggested package": pkg ? pkg.name + " (" + pkg.price + ")" : "",
       "Event date": answers.date || "",
       "Setup time": answers.time || "",
       Location: answers.location || "",
@@ -152,16 +217,22 @@
 
   function showThanks(viaMailto) {
     bar.style.width = "100%";
+    var first = answers.name ? answers.name.split(" ")[0] : "friend";
+    var recap = [];
+    if (answers.occasion) recap.push(answers.occasion);
+    if (answers.guests) recap.push(answers.guests.toLowerCase() + " guests");
+    if (answers.date) recap.push("on " + answers.date);
+    var recapLine = recap.length ? '<p class="inquiry__help">Your request — ' + esc(recap.join(" · ")) + " — is on its way.</p>" : "";
+    var reply = answers.email
+      ? "<p>We'll reply to <strong>" + esc(answers.email) + "</strong> soon to get the lemonade flowing. 🍋</p>"
+      : "<p>We'll be in touch soon to get the lemonade flowing. 🍋</p>";
     var extra = viaMailto
-      ? "<p class=\"inquiry__help\">If your email app didn't pop open, just send your note to <a href=\"mailto:" + EMAIL + "\">" + EMAIL + "</a>.</p>"
+      ? '<p class="inquiry__help">If your email app didn\'t open, send your note to <a href="mailto:' + EMAIL + '">' + EMAIL + "</a>.</p>"
       : "";
     stage.innerHTML =
-      '<div class="inquiry__done">' +
-      '<div class="inquiry__done-icon">🍋</div>' +
-      "<h3>Thanks, " + (answers.name ? answers.name.split(" ")[0] : "friend") + "!</h3>" +
-      "<p>Your catering inquiry is on its way. We'll be in touch soon to get the lemonade flowing.</p>" +
-      extra +
-      "</div>";
+      '<div class="inquiry__done"><div class="inquiry__done-icon">🍋</div>' +
+      "<h3>Thanks, " + esc(first) + "!</h3>" + recapLine + reply + extra + "</div>";
+    animateStage();
     form.querySelector(".inquiry__nav").style.display = "none";
     hint.style.display = "none";
   }
@@ -180,7 +251,6 @@
           showThanks(false);
         })
         .catch(function () {
-          // Network/endpoint failure — fall back to the visitor's email app.
           sendMailto();
           showThanks(true);
         })
@@ -231,6 +301,7 @@
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
+    if (step >= REVIEW) { submit(); return; }
     if (validateCurrent()) advance();
   });
 
@@ -240,6 +311,15 @@
 
   document.addEventListener("keydown", function (e) {
     if (root.hidden) return;
-    if (e.key === "Escape") close();
+    if (e.key === "Escape") { close(); return; }
+    // Number keys pick an option on choice questions.
+    if (step < REVIEW && QUESTIONS[step].type === "choice" && /^[1-9]$/.test(e.key)) {
+      var opts = QUESTIONS[step].options;
+      var idx = parseInt(e.key, 10) - 1;
+      if (idx < opts.length) {
+        answers[QUESTIONS[step].id] = opts[idx];
+        advance();
+      }
+    }
   });
 })();
