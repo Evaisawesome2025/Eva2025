@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glen's Lemons — Printable "Scan Me" Sign</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --lemon:#ffd23f; --lemon-deep:#f4b400; --ink:#3a2e12; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Nunito", system-ui, sans-serif;
+      color: var(--ink);
+      background: #fff7d6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .sign {
+      width: 100%;
+      max-width: 620px;
+      text-align: center;
+      background: linear-gradient(160deg, var(--lemon), var(--lemon-deep));
+      border: 6px solid var(--ink);
+      border-radius: 28px;
+      padding: 2.25rem 2rem 2.5rem;
+    }
+    .sign__logo { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; box-shadow: 0 6px 16px rgba(58,46,18,.3); }
+    h1 { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 2.4rem; line-height: 1.05; margin: 0.75rem 0 0.25rem; }
+    .tag { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.25rem; }
+    .scan { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 1rem; }
+    .qr { width: 280px; height: 280px; background: #fff; border-radius: 16px; padding: 12px; box-shadow: 0 6px 16px rgba(58,46,18,.25); }
+    .url { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 1.5rem; margin: 1rem 0 0.75rem; }
+    .market { font-weight: 700; font-size: 1.05rem; }
+    .hint { margin-top: 1.25rem; color: #6b5b34; font-size: 0.9rem; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .hint { display: none; }
+      .sign { border-color: var(--ink); }
+    }
+  </style>
+</head>
+<body>
+  <div class="sign">
+    <img class="sign__logo" src="/glens-lemons/logo.webp" alt="Glen's Lemons logo" />
+    <h1>Fresh Squeezed<br />Lemonade</h1>
+    <p class="tag">Water · Sugar · Lemons 🍋</p>
+    <p class="scan">📲 Scan for our menu &amp; catering!</p>
+    <img class="qr" src="/glens-lemons/qr.png" alt="Scan to visit glenslemons.com" width="280" height="280" />
+    <p class="url">www.glenslemons.com</p>
+    <p class="market">🗓️ Lake Lorraine Farmers Market · Thursdays 4&nbsp;PM</p>
+  </div>
+  <p class="hint">Tip: press <strong>Ctrl/Cmd&nbsp;+&nbsp;P</strong> to print this sign, then tape it to your stand. 🍋</p>
+</body>
+</html>
