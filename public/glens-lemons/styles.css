@@ -595,6 +595,20 @@ a { color: inherit; }
   flex: 1;
   -webkit-overflow-scrolling: touch;
 }
+/* Fade hint at the bottom of the stage when there's more to scroll */
+.inquiry__stage::after {
+  content: "";
+  display: block;
+  position: sticky;
+  bottom: 0;
+  height: 48px;
+  margin-top: -48px;
+  background: linear-gradient(to bottom, rgba(255, 253, 243, 0), var(--cream) 85%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.inquiry__stage.can-scroll::after { opacity: 1; }
 .inquiry__step {
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -793,6 +807,11 @@ textarea.inquiry__input { resize: vertical; }
   .inquiry__nav { margin-top: 1rem; }
   .inquiry__nav .btn { flex: 1; text-align: center; }
   .inquiry__nav .inquiry__next { margin-left: 0; }
+  /* Tighter review rows so the whole summary fits smaller screens */
+  .inquiry__review-row { padding: 0.4rem 0.1rem; font-size: 0.9rem; }
+  .inquiry__pkg { padding: 0.7rem 1rem; margin: 0.4rem 0 0.75rem; }
+  .inquiry__pkg-price { font-size: 1.35rem; }
+  .inquiry__pkg-name { font-size: 1.05rem; }
 }
 @keyframes sheetUp {
   from { transform: translateY(48px); opacity: 0.4; }
