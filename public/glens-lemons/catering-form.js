@@ -185,9 +185,66 @@
     setTimeout(advance, 160);
   }
 
-  // Lightweight place autocomplete for the location question. Uses the free
-  // OpenStreetMap-based Photon API (no key needed), biased to Sioux Falls.
-  // If the request fails the input still works as plain text.
+  // ---- Location autocomplete ------------------------------------------------
+  // Paste a Google Maps Platform API key (Places API (New) enabled, referrer-
+  // restricted to glenslemons.com) to power suggestions with Google Places.
+  // Without a key, suggestions come from the curated local list below plus the
+  // free OpenStreetMap Photon API. Plain typing always works regardless.
+  var GOOGLE_PLACES_KEY = "";
+
+  // Popular Sioux Falls event spots — matched instantly, shown first.
+  var LOCAL_SPOTS = [
+    "Falls Park", "Lake Lorraine", "McKennan Park", "Sherman Park",
+    "Terrace Park", "Yankton Trail Park", "Sertoma Park", "Leaders Park",
+    "W.H. Lyon Fairgrounds", "Washington Pavilion",
+    "Sioux Falls Convention Center", "Levitt at the Falls"
+  ];
+
+  function localMatches(qtext, max) {
+    var needle = qtext.toLowerCase();
+    return LOCAL_SPOTS
+      .filter(function (s) { return s.toLowerCase().indexOf(needle) >= 0; })
+      .slice(0, max)
+      .map(function (s) { return { main: s, sub: "Sioux Falls, SD" }; });
+  }
+
+  function googleSuggest(qtext, signal) {
+    return fetch("https://places.googleapis.com/v1/places:autocomplete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Goog-Api-Key": GOOGLE_PLACES_KEY },
+      body: JSON.stringify({
+        input: qtext,
+        regionCode: "US",
+        locationBias: { circle: { center: { latitude: 43.5446, longitude: -96.7311 }, radius: 30000 } }
+      }),
+      signal: signal
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      return (data.suggestions || []).map(function (s) {
+        var p = s.placePrediction || {};
+        var sf = p.structuredFormat || {};
+        return {
+          main: (sf.mainText || {}).text || (p.text || {}).text || "",
+          sub: (sf.secondaryText || {}).text || ""
+        };
+      }).filter(function (x) { return x.main; });
+    });
+  }
+
+  function photonSuggest(qtext, signal) {
+    return fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(qtext) +
+                 "&limit=4&lang=en&lat=43.5446&lon=-96.7311", signal ? { signal: signal } : {})
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        return (data.features || []).map(function (f) {
+          var p = f.properties || {};
+          return {
+            main: p.name || [p.street, p.housenumber].filter(Boolean).join(" "),
+            sub: [p.city || p.county, p.state].filter(Boolean).join(", ")
+          };
+        }).filter(function (x) { return x.main; });
+      });
+  }
+
   function attachPlaceSuggest(input) {
     var box = document.createElement("div");
     box.className = "inquiry__suggest";
@@ -195,39 +252,49 @@
     input.insertAdjacentElement("afterend", box);
     var timer, controller;
     function clear() { box.innerHTML = ""; box.hidden = true; }
+
+    function show(items) {
+      box.innerHTML = "";
+      var seen = {};
+      items.forEach(function (it) {
+        var key = it.main.toLowerCase();
+        if (seen[key] || box.children.length >= 5) return;
+        seen[key] = true;
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "inquiry__suggest-item";
+        b.innerHTML = '📍 <span>' + esc(it.main) + "</span>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "");
+        b.addEventListener("click", function () {
+          input.value = it.main + (it.sub ? ", " + it.sub : "");
+          clear();
+          input.focus();
+        });
+        box.appendChild(b);
+      });
+      box.hidden = box.children.length === 0;
+      updateScrollHint();
+    }
+
+    // Quick picks the moment the field is focused, before any typing.
+    input.addEventListener("focus", function () {
+      if (!input.value.trim()) show(localMatches("", 4));
+    });
+
     input.addEventListener("input", function () {
       clearTimeout(timer);
       var qtext = input.value.trim();
-      if (qtext.length < 3) { clear(); return; }
+      if (!qtext) { show(localMatches("", 4)); return; }
+      var locals = localMatches(qtext, 3);
+      show(locals); // instant local results while the network catches up
+      if (qtext.length < 3) return;
       timer = setTimeout(function () {
         if (controller && controller.abort) controller.abort();
         controller = window.AbortController ? new AbortController() : null;
-        fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(qtext) +
-              "&limit=4&lang=en&lat=43.5446&lon=-96.7311",
-              controller ? { signal: controller.signal } : {})
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            var feats = (data.features || []).slice(0, 4);
-            box.innerHTML = "";
-            feats.forEach(function (f) {
-              var p = f.properties || {};
-              var main = p.name || [p.street, p.housenumber].filter(Boolean).join(" ");
-              if (!main) return;
-              var sub = [p.city || p.county, p.state].filter(Boolean).join(", ");
-              var b = document.createElement("button");
-              b.type = "button";
-              b.className = "inquiry__suggest-item";
-              b.innerHTML = '📍 <span>' + esc(main) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "");
-              b.addEventListener("click", function () {
-                input.value = main + (sub ? ", " + sub : "");
-                clear();
-                input.focus();
-              });
-              box.appendChild(b);
-            });
-            box.hidden = box.children.length === 0;
-          })
-          .catch(function () { clear(); });
+        var signal = controller ? controller.signal : undefined;
+        var remote = GOOGLE_PLACES_KEY ? googleSuggest(qtext, signal) : photonSuggest(qtext, signal);
+        remote
+          .then(function (items) { show(locals.concat(items)); })
+          .catch(function () { /* keep the local suggestions */ });
       }, 250);
     });
   }
