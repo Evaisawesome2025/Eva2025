@@ -81,11 +81,21 @@
     if (lemon) lemon.style.left = pct + "%";
   }
 
+  // Show a fade at the stage's bottom edge whenever more content is below.
+  function updateScrollHint() {
+    var more = stage.scrollHeight - stage.scrollTop - stage.clientHeight > 8;
+    stage.classList.toggle("can-scroll", more);
+  }
+  stage.addEventListener("scroll", updateScrollHint);
+  window.addEventListener("resize", updateScrollHint);
+
   // Re-trigger the slide-in animation each time the stage content changes.
   function animateStage() {
     stage.classList.remove("is-anim");
     void stage.offsetWidth; // reflow
     stage.classList.add("is-anim");
+    stage.scrollTop = 0;
+    requestAnimationFrame(updateScrollHint);
   }
 
   function render() {
