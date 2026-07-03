@@ -44,6 +44,8 @@
   // ---- Elements -------------------------------------------------------------
   var root = document.getElementById("inquiry");
   if (!root) return;
+  var panel = root.querySelector(".inquiry__panel");
+  var handle = document.getElementById("inquiry-handle");
   var stage = document.getElementById("inquiry-stage");
   var bar = document.getElementById("inquiry-bar");
   var form = document.getElementById("inquiry-form");
@@ -134,7 +136,7 @@
       var ph = isOther ? (q.otherPlaceholder || "") : (q.placeholder || "");
       var val = isOther && q.options && q.options.indexOf(current) >= 0 ? "" : current;
       html += '<input class="inquiry__input" id="inquiry-input" type="' + inputType + '"' + min + attrs +
-        ' placeholder="' + esc(ph) + '" value="' + esc(val) + '" />';
+        ' enterkeyhint="next" placeholder="' + esc(ph) + '" value="' + esc(val) + '" />';
       if (isOther) html += '<button type="button" class="inquiry__choices-back" id="inquiry-choices-back">← Back to the list</button>';
     }
     html += '<p class="inquiry__error" id="inquiry-error" role="alert"></p>';
@@ -179,6 +181,7 @@
     }
     answers[q.id] = val;
     otherMode[q.id] = false;
+    if (navigator.vibrate) navigator.vibrate(8); // tiny haptic tick (Android)
     if (reduce || !btn) { advance(); return; }
     // A quick squish so the tap feels juicy before advancing.
     btn.classList.add("is-picked");
@@ -436,6 +439,17 @@
     window.location.href = url;
   }
 
+  // ---- Keyboard-aware sheet (iOS overlays the keyboard over fixed sheets) ----
+  // While the form is open, pad the panel's bottom by the keyboard overlap so
+  // the input and Back/Next buttons always stay visible above the keyboard.
+  function keyboardPad() {
+    if (!panel || !window.visualViewport) return;
+    var vv = window.visualViewport;
+    var overlap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    panel.style.paddingBottom = overlap ? overlap + "px" : "";
+    updateScrollHint();
+  }
+
   // ---- Open / close ---------------------------------------------------------
   function open() {
     lastFocused = document.activeElement;
@@ -445,13 +459,38 @@
     root.hidden = false;
     document.body.style.overflow = "hidden";
     form.querySelector(".inquiry__nav").style.display = "";
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", keyboardPad);
     render();
   }
 
   function close() {
     root.hidden = true;
     document.body.style.overflow = "";
+    if (window.visualViewport) window.visualViewport.removeEventListener("resize", keyboardPad);
+    if (panel) { panel.style.paddingBottom = ""; panel.style.transform = ""; }
     if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  // ---- Swipe down on the grab handle to dismiss (native sheet gesture) ------
+  if (handle && panel) {
+    var dragY = null, dragCur = 0;
+    handle.addEventListener("touchstart", function (e) {
+      dragY = e.touches[0].clientY;
+      dragCur = 0;
+      panel.style.transition = "none";
+    }, { passive: true });
+    handle.addEventListener("touchmove", function (e) {
+      if (dragY === null) return;
+      dragCur = Math.max(0, e.touches[0].clientY - dragY);
+      panel.style.transform = dragCur ? "translateY(" + dragCur + "px)" : "";
+    }, { passive: true });
+    handle.addEventListener("touchend", function () {
+      panel.style.transition = "";
+      if (dragCur > 90) close();
+      panel.style.transform = "";
+      dragY = null;
+      dragCur = 0;
+    });
   }
 
   // ---- Wire up --------------------------------------------------------------
