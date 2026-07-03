@@ -834,7 +834,9 @@ textarea.inquiry__input { resize: vertical; }
   to { transform: none; opacity: 1; }
 }
 /* The "press Enter" hint means nothing on touch screens */
-@media (hover: none) {
+/* Hide the Enter hint on touch devices — including stylus phones (S-Pen etc.)
+   that report hover capability but whose primary pointer is still a finger. */
+@media (hover: none), (pointer: coarse) {
   .inquiry__hint { display: none !important; }
 }
 
