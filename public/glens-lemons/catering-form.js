@@ -446,6 +446,12 @@
     if (!panel || !window.visualViewport) return;
     var vv = window.visualViewport;
     var overlap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    // Only meaningful on iOS, where the keyboard overlays the layout viewport.
+    // Android resizes the page itself (interactive-widget=resizes-content), so
+    // overlap stays ~0 there. Ignore tiny UI-chrome wobble and cap the pad so a
+    // misreported viewport can never blow the sheet up.
+    if (overlap < 60) overlap = 0;
+    overlap = Math.min(overlap, Math.round(window.innerHeight * 0.45));
     panel.style.paddingBottom = overlap ? overlap + "px" : "";
     updateScrollHint();
   }
