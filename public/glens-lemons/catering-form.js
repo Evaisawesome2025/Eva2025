@@ -189,11 +189,11 @@
   }
 
   // ---- Location autocomplete ------------------------------------------------
-  // Paste a Google Maps Platform API key (Places API (New) enabled, referrer-
-  // restricted to glenslemons.com) to power suggestions with Google Places.
-  // Without a key, suggestions come from the curated local list below plus the
-  // free OpenStreetMap Photon API. Plain typing always works regardless.
-  var GOOGLE_PLACES_KEY = "";
+  // Google Maps Platform API key — referrer-restricted to glenslemons.com and
+  // limited to Places API (New), so it is safe to ship in client code. If
+  // Google is unavailable, suggestions fall back to the curated local list
+  // below plus the free OpenStreetMap Photon API. Typing always works.
+  var GOOGLE_PLACES_KEY = "AIzaSyDq0K6cc6HT1q1G05XJ8GtxlGrSL4uQQ3A";
 
   // Popular Sioux Falls event spots — matched instantly, shown first.
   var LOCAL_SPOTS = [
@@ -221,7 +221,10 @@
         locationBias: { circle: { center: { latitude: 43.5446, longitude: -96.7311 }, radius: 30000 } }
       }),
       signal: signal
-    }).then(function (r) { return r.json(); }).then(function (data) {
+    }).then(function (r) {
+      if (!r.ok) throw new Error("places " + r.status);
+      return r.json();
+    }).then(function (data) {
       return (data.suggestions || []).map(function (s) {
         var p = s.placePrediction || {};
         var sf = p.structuredFormat || {};
@@ -294,7 +297,11 @@
         if (controller && controller.abort) controller.abort();
         controller = window.AbortController ? new AbortController() : null;
         var signal = controller ? controller.signal : undefined;
-        var remote = GOOGLE_PLACES_KEY ? googleSuggest(qtext, signal) : photonSuggest(qtext, signal);
+        // Google first when a key is set; if Google errors for any reason
+        // (API disabled, quota, network) quietly fall back to Photon.
+        var remote = GOOGLE_PLACES_KEY
+          ? googleSuggest(qtext, signal).catch(function () { return photonSuggest(qtext, signal); })
+          : photonSuggest(qtext, signal);
         remote
           .then(function (items) { show(locals.concat(items)); })
           .catch(function () { /* keep the local suggestions */ });
