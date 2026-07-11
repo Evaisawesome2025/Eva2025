@@ -284,6 +284,11 @@ a { color: inherit; }
   grid-template-columns: minmax(0, 340px);
   justify-content: center;
 }
+/* Two-flavor menu: a centered pair */
+.menu__grid--two {
+  grid-template-columns: repeat(2, minmax(0, 320px));
+  justify-content: center;
+}
 .menu-card {
   position: relative;
   background: var(--white);
@@ -301,6 +306,15 @@ a { color: inherit; }
   transform: scale(1.04);
 }
 .menu-card--featured:hover { transform: scale(1.04) translateY(-6px); }
+/* Strawberry flavor card — same prominence, berry colors */
+.menu-card--berry {
+  border-color: #e8577d;
+  background: linear-gradient(180deg, #fff5f7, #ffe3ea);
+  transform: scale(1.04);
+}
+.menu-card--berry:hover { transform: scale(1.04) translateY(-6px); }
+.menu-card--berry .menu-card__price { color: #d63c66; }
+.menu-card__tag--berry { background: #d63c66; color: #fff; }
 .menu-card__tag {
   position: absolute;
   top: -14px;
