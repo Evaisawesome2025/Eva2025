@@ -315,6 +315,15 @@ a { color: inherit; }
 .menu-card--berry:hover { transform: scale(1.04) translateY(-6px); }
 .menu-card--berry .menu-card__price { color: #d63c66; }
 .menu-card__tag--berry { background: #d63c66; color: #fff; }
+/* The Berry Beast — the loaded premium drink, in bold mixed-berry purple */
+.menu-card--beast {
+  border-color: #8b4bb0;
+  background: linear-gradient(180deg, #f8f1fc, #eddcf7);
+  transform: scale(1.04);
+}
+.menu-card--beast:hover { transform: scale(1.04) translateY(-6px); }
+.menu-card--beast .menu-card__price { color: #7a2f9e; }
+.menu-card__tag--beast { background: #7a2f9e; color: #fff; }
 .menu-card__tag {
   position: absolute;
   top: -14px;
