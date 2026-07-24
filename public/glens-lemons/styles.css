@@ -442,6 +442,32 @@ a { color: inherit; }
 .cta h2 { font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 0.5rem; }
 .cta p { font-size: 1.15rem; margin-bottom: 1.75rem; color: var(--ink); }
 
+/* ===== Dancing lemon ===== */
+.dancer { display: flex; justify-content: center; margin: 0 auto 1rem; }
+.dancer__svg {
+  width: clamp(120px, 28vw, 160px);
+  height: auto;
+  overflow: visible;
+  transform-origin: 50% 88%;
+  animation: dancerBop 1.05s ease-in-out infinite alternate;
+}
+.dancer__arm, .dancer__leg { transform-box: view-box; }
+.dancer__arm--l { transform-origin: 54px 70px; animation: dancerArmL 0.52s ease-in-out infinite alternate; }
+.dancer__arm--r { transform-origin: 106px 70px; animation: dancerArmR 0.52s ease-in-out infinite alternate; }
+.dancer__leg--l { transform-origin: 72px 118px; animation: dancerLegL 0.52s ease-in-out infinite alternate; }
+.dancer__leg--r { transform-origin: 88px 118px; animation: dancerLegR 0.52s ease-in-out infinite alternate; }
+@keyframes dancerBop {
+  0%   { transform: translateY(2px) rotate(-5deg); }
+  100% { transform: translateY(-12px) rotate(5deg); }
+}
+@keyframes dancerArmL { 0% { transform: rotate(-18deg); } 100% { transform: rotate(-58deg); } }
+@keyframes dancerArmR { 0% { transform: rotate(18deg); } 100% { transform: rotate(58deg); } }
+@keyframes dancerLegL { 0% { transform: rotate(10deg); } 100% { transform: rotate(-8deg); } }
+@keyframes dancerLegR { 0% { transform: rotate(-10deg); } 100% { transform: rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .dancer__svg, .dancer__arm, .dancer__leg { animation: none; }
+}
+
 /* ===== Footer ===== */
 .site-footer {
   background: var(--ink);
