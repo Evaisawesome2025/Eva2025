@@ -437,6 +437,50 @@
     <!-- ===== CTA ===== -->
     <section class="cta">
       <div class="container cta__inner">
+        <div class="dancer" aria-hidden="true">
+          <svg class="dancer__svg" viewBox="0 0 160 182" role="img" aria-label="A dancing lemon">
+            <defs>
+              <radialGradient id="lemonBody" cx="40%" cy="34%" r="72%">
+                <stop offset="0%" stop-color="#fff29a"/>
+                <stop offset="55%" stop-color="#ffd23f"/>
+                <stop offset="100%" stop-color="#f4b400"/>
+              </radialGradient>
+            </defs>
+            <!-- legs -->
+            <g class="dancer__leg dancer__leg--l">
+              <rect x="66" y="116" width="12" height="44" rx="6" fill="#f4b400" stroke="#2e2a1a" stroke-width="2.5"/>
+              <ellipse cx="64" cy="162" rx="14" ry="7.5" fill="#2e2a1a"/>
+            </g>
+            <g class="dancer__leg dancer__leg--r">
+              <rect x="82" y="116" width="12" height="44" rx="6" fill="#f4b400" stroke="#2e2a1a" stroke-width="2.5"/>
+              <ellipse cx="96" cy="162" rx="14" ry="7.5" fill="#2e2a1a"/>
+            </g>
+            <!-- body -->
+            <g class="dancer__body">
+              <path d="M78,30 q-4,-13 5,-18 q6,7 3,18 z" fill="#5fa83a" stroke="#2e2a1a" stroke-width="2"/>
+              <path d="M92,20 q24,-13 33,7 q-20,11 -33,-7 z" fill="#6fbf46" stroke="#2e2a1a" stroke-width="2"/>
+              <ellipse cx="80" cy="82" rx="49" ry="53" fill="url(#lemonBody)" stroke="#2e2a1a" stroke-width="3"/>
+              <g fill="#14141d">
+                <rect x="46" y="62" width="28" height="19" rx="8"/>
+                <rect x="86" y="62" width="28" height="19" rx="8"/>
+                <rect x="71" y="68" width="18" height="6" rx="3"/>
+              </g>
+              <circle cx="55" cy="68" r="3.2" fill="#ffffff" opacity=".55"/>
+              <circle cx="95" cy="68" r="3.2" fill="#ffffff" opacity=".55"/>
+              <path d="M59,95 Q80,122 101,95 Q80,107 59,95 Z" fill="#a8342a"/>
+              <path d="M73,105 Q80,112 87,105 Q80,109 73,105 Z" fill="#e2735f"/>
+            </g>
+            <!-- arms -->
+            <g class="dancer__arm dancer__arm--l">
+              <rect x="12" y="64" width="44" height="12" rx="6" fill="#f4b400" stroke="#2e2a1a" stroke-width="2.5"/>
+              <circle cx="14" cy="70" r="9.5" fill="#ffd23f" stroke="#2e2a1a" stroke-width="2.5"/>
+            </g>
+            <g class="dancer__arm dancer__arm--r">
+              <rect x="104" y="64" width="44" height="12" rx="6" fill="#f4b400" stroke="#2e2a1a" stroke-width="2.5"/>
+              <circle cx="146" cy="70" r="9.5" fill="#ffd23f" stroke="#2e2a1a" stroke-width="2.5"/>
+            </g>
+          </svg>
+        </div>
         <h2>Thirsty yet?</h2>
         <p>Come find the freshest lemonade in Sioux Falls.</p>
         <a class="btn btn--dark" href="#find-us">Find the Stand</a>
