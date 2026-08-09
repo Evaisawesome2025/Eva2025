@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glen's Lemons — Printable Menu Sign</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --lemon:#ffd23f; --lemon-deep:#f4b400; --ink:#3a2e12; --ink-soft:#6b5b34;
+      --pink:#d63c66; --green:#4e8f1e; --purple:#7a2f9e; --teal:#12909e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Nunito", system-ui, sans-serif;
+      color: var(--ink);
+      background: #fff7d6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .sign {
+      width: 100%;
+      max-width: 640px;
+      background: #fffdf3;
+      border: 6px solid var(--ink);
+      border-radius: 26px;
+      overflow: hidden;
+    }
+    .sign__head {
+      text-align: center;
+      background: linear-gradient(160deg, var(--lemon), var(--lemon-deep));
+      padding: 1.5rem 1.25rem 1.25rem;
+      border-bottom: 5px solid var(--ink);
+    }
+    .sign__logo { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; box-shadow: 0 5px 12px rgba(58,46,18,.3); }
+    h1 { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 2.1rem; line-height: 1.02; margin: 0.5rem 0 0.2rem; }
+    .sub { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
+    .allsize {
+      display: inline-block; margin-top: 0.6rem;
+      font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 0.9rem;
+      background: var(--ink); color: var(--lemon);
+      padding: 0.25rem 0.9rem; border-radius: 999px;
+    }
+    .list { padding: 0.5rem 1.1rem; }
+    .row {
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.7rem 0.4rem;
+      border-bottom: 2px dashed #eadfb4;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row__accent { width: 8px; align-self: stretch; border-radius: 6px; flex-shrink: 0; }
+    .row__body { flex: 1; text-align: left; }
+    .row__name { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 1.3rem; line-height: 1.05; }
+    .row__desc { font-size: 0.82rem; color: var(--ink-soft); margin-top: 0.1rem; }
+    .row__price { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 1.9rem; flex-shrink: 0; }
+    .c-lemon { background: var(--lemon-deep); } .p-lemon { color: var(--lemon-deep); }
+    .c-pink { background: var(--pink); } .p-pink { color: var(--pink); }
+    .c-green { background: var(--green); } .p-green { color: var(--green); }
+    .c-purple { background: var(--purple); } .p-purple { color: var(--purple); }
+    .c-teal { background: var(--teal); } .p-teal { color: var(--teal); }
+    /* Glenzilla feature row */
+    .glz {
+      margin: 0.5rem 1.1rem 0;
+      background: linear-gradient(135deg, #2a1c05, #3a2e12 55%, #4a0f45);
+      border: 3px solid var(--lemon);
+      border-radius: 18px;
+      color: #fff7d6;
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.9rem 1rem;
+    }
+    .glz__body { flex: 1; text-align: left; }
+    .glz__crown { font-family:"Baloo 2",sans-serif; font-weight:700; font-size:0.72rem; color:var(--ink); background:var(--lemon); padding:0.15rem 0.6rem; border-radius:999px; }
+    .glz__name { font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.6rem; color:var(--lemon); line-height:1.02; margin-top:0.2rem; }
+    .glz__desc { font-size:0.78rem; color:#f0e6cf; margin-top:0.15rem; }
+    .glz__price { font-family:"Baloo 2",sans-serif; font-weight:800; font-size:2rem; color:var(--lemon); flex-shrink:0; text-align:center; line-height:1; }
+    .glz__price small { display:block; font-size:0.7rem; }
+    .sign__foot {
+      text-align: center;
+      padding: 0.9rem 1rem 1.2rem;
+      font-weight: 800;
+      font-family: "Baloo 2", sans-serif;
+    }
+    .sign__foot .pay { font-size: 1rem; }
+    .sign__foot .url { font-size: 1.2rem; margin-top: 0.3rem; color: var(--ink); }
+    .sign__foot .real { font-size: 0.8rem; color: var(--ink-soft); font-family:"Nunito",sans-serif; font-weight:700; margin-top:0.25rem; }
+    .hint { margin-top: 1.25rem; color: #6b5b34; font-size: 0.9rem; text-align:center; }
+    @media print {
+      body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .hint { display: none; }
+      @page { margin: 0.35in; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sign">
+    <div class="sign__head">
+      <img class="sign__logo" src="/glens-lemons/logo.webp" alt="Glen's Lemons logo" />
+      <h1>Fresh Squeezed Lemonade</h1>
+      <p class="sub">Made with real lemons. Never from concentrate.</p>
+      <span class="allsize">🍋 All drinks a full 32 oz</span>
+    </div>
+
+    <div class="list">
+      <div class="row">
+        <span class="row__accent c-lemon"></span>
+        <div class="row__body">
+          <div class="row__name">Fresh Squeezed Lemonade</div>
+          <div class="row__desc">Classic, simple, and always refreshing.</div>
+        </div>
+        <div class="row__price p-lemon">$7</div>
+      </div>
+      <div class="row">
+        <span class="row__accent c-pink"></span>
+        <div class="row__body">
+          <div class="row__name">Strawberry Lemonade</div>
+          <div class="row__desc">Sweet strawberry, perfectly blended.</div>
+        </div>
+        <div class="row__price p-pink">$8</div>
+      </div>
+      <div class="row">
+        <span class="row__accent c-green"></span>
+        <div class="row__body">
+          <div class="row__name">The Limeminator</div>
+          <div class="row__desc">Lemon + lime — the ultimate citrus combo.</div>
+        </div>
+        <div class="row__price p-green">$9</div>
+      </div>
+      <div class="row">
+        <span class="row__accent c-purple"></span>
+        <div class="row__body">
+          <div class="row__name">The Berry Beast</div>
+          <div class="row__desc">Mixed berries + strawberry lemonade. Bold &amp; unstoppable.</div>
+        </div>
+        <div class="row__price p-purple">$10</div>
+      </div>
+      <div class="row">
+        <span class="row__accent c-teal"></span>
+        <div class="row__body">
+          <div class="row__name">The Coconut Squeeze</div>
+          <div class="row__desc">Tropical coconut. Pure paradise.</div>
+        </div>
+        <div class="row__price p-teal">$8</div>
+      </div>
+    </div>
+
+    <div class="glz">
+      <div class="glz__body">
+        <span class="glz__crown">👑 THE LEGEND</span>
+        <div class="glz__name">The Glenzilla</div>
+        <div class="glz__desc">The ultimate fruit explosion — lemons, lime, strawberries, mango &amp; passion fruit. Big size. Big legend.</div>
+      </div>
+      <div class="glz__price">$20<small>64 OZ</small></div>
+    </div>
+
+    <div class="sign__foot">
+      <div class="pay">💵 Cash &amp; 💳 Cards Accepted</div>
+      <div class="url">www.glenslemons.com</div>
+      <div class="real">🍋 Fresh squeezed to order · Sioux Falls, SD</div>
+    </div>
+  </div>
+  <p class="hint">Tip: press <strong>Ctrl/Cmd&nbsp;+&nbsp;P</strong> to print this menu, then tape it to your stand. 🍋</p>
+</body>
+</html>
