@@ -324,6 +324,95 @@ a { color: inherit; }
 .menu-card--beast:hover { transform: scale(1.04) translateY(-6px); }
 .menu-card--beast .menu-card__price { color: #7a2f9e; }
 .menu-card__tag--beast { background: #7a2f9e; color: #fff; }
+/* The Limeminator — zesty lemon-lime green */
+.menu-card--lime {
+  border-color: #7cb342;
+  background: linear-gradient(180deg, #f6fbe9, #e6f4c9);
+}
+.menu-card--lime .menu-card__price { color: #4e8f1e; }
+.menu-card__tag--lime { background: #4e8f1e; color: #fff; }
+/* The Coconut Squeeze — tropical teal */
+.menu-card--coconut {
+  border-color: #1fb0bf;
+  background: linear-gradient(180deg, #eefbfc, #d6f2f5);
+}
+.menu-card--coconut .menu-card__price { color: #12909e; }
+.menu-card__tag--coconut { background: #12909e; color: #fff; }
+
+/* Drinks grid — centered flex so five flavor cards wrap and center neatly */
+.drinks__grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.75rem 1.5rem;
+}
+.drinks__grid .menu-card {
+  flex: 1 1 260px;
+  max-width: 320px;
+  transform: none;
+}
+.drinks__grid .menu-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+
+/* The Glenzilla — full-width legendary feature */
+.glenzilla {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem 2.75rem;
+  text-align: center;
+  background: linear-gradient(135deg, #2a1c05 0%, #3a2e12 50%, #4a0f45 100%);
+  border: 3px solid var(--lemon);
+  border-radius: var(--radius);
+  padding: 2.25rem 1.75rem;
+  color: var(--cream);
+  box-shadow: var(--shadow);
+}
+.glenzilla__text { max-width: 46ch; }
+.glenzilla__crown {
+  display: inline-block;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: var(--lemon);
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 0.6rem;
+}
+.glenzilla h3 {
+  color: var(--lemon);
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  margin-bottom: 0.15rem;
+}
+.glenzilla__tagline {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  color: #ff5db1;
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+}
+.glenzilla__desc { color: #f0e6cf; font-size: 0.98rem; }
+.glenzilla__badge {
+  flex-shrink: 0;
+  display: grid;
+  place-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--lemon);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.glenzilla__price {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 800;
+  font-size: 3rem;
+  line-height: 1;
+}
+.glenzilla__size { font-weight: 700; font-size: 0.95rem; }
 .menu-card__tag {
   position: absolute;
   top: -14px;
