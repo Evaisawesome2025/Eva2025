@@ -1,0 +1,8 @@
+# Secrets — never commit
+config/credentials.env
+
+# Agent output and run logs — local, not source
+outbox/*
+!outbox/.gitkeep
+logs/*
+!logs/.gitkeep

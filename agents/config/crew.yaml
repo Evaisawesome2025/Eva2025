@@ -1,0 +1,37 @@
+# Which agents run, when, and with what model.
+# Cron format: minute hour day month weekday. Times are your server's local time.
+# run_crew.sh runs every agent whose `enabled: true`. install_cron.sh uses each `schedule`.
+
+defaults:
+  model: "claude-opus-4-8"           # the model the agents run on (Claude Agent SDK / claude -p)
+  permission_mode: "acceptEdits"     # lets agents write to outbox/ and logs/ without prompting
+
+agents:
+  june:                               # content writer
+    file: "crew/june-content.md"
+    enabled: true
+    schedule: "0 6 * * 1"            # Mondays 6am — fresh content to start the week
+  tara:                               # lead finder (read-only, safe)
+    file: "crew/tara-leadfinder.md"
+    enabled: true
+    schedule: "0 7 * * *"            # every morning 7am
+  sara:                               # outreach drafts (never sends)
+    file: "crew/sara-outreach.md"
+    enabled: false                    # turn on once config/outreach-targets.yaml has real prospects
+    schedule: "0 8 * * 2"            # Tuesdays 8am
+  bob:                                # 3am watchdog (read-only, safe)
+    file: "crew/bob-monitor.md"
+    enabled: true
+    schedule: "0 */4 * * *"          # every 4 hours, around the clock
+  leo:                                # weekly analyst (read-only, safe)
+    file: "crew/leo-analyst.md"
+    enabled: true
+    schedule: "0 8 * * 1"            # Monday 8am weekly report
+  nova:                               # review-reply drafts (never posts)
+    file: "crew/nova-reputation.md"
+    enabled: false                    # turn on once config/reviews-inbox.yaml is wired up
+    schedule: "0 9 * * *"
+  maya:                               # inbox triage (never sends)
+    file: "crew/maya-inbox.md"
+    enabled: false                    # turn on once config/inbox.yaml or a mailbox is connected
+    schedule: "0 7 * * *"
