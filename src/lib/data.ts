@@ -35,14 +35,22 @@ export interface DealComp {
   source: string | null;
 }
 
+export interface DealPhoto {
+  id: string;
+  storagePath: string;
+  caption: string | null;
+}
+
 export interface DealDetail extends DealSummary {
   propertyId: string;
+  shareToken: string | null;
   holdingMonths: number | null;
   financingCost: number | null;
   sellingCostPct: number | null;
   closingCostEstimate: number | null;
   notes: DealNote[];
   comps: DealComp[];
+  photos: DealPhoto[];
 }
 
 function asVerdict(value: string | null | undefined): Verdict {
@@ -129,6 +137,7 @@ export async function getDealDetail(id: string): Promise<DealDetail | null> {
             analyses: { orderBy: { createdAt: "desc" }, take: 1 },
             comparables: { orderBy: { createdAt: "desc" } },
             notes: { orderBy: { createdAt: "desc" } },
+            photos: { orderBy: { createdAt: "desc" } },
           },
         },
       },
@@ -139,6 +148,7 @@ export async function getDealDetail(id: string): Promise<DealDetail | null> {
     return {
       ...mapSummary(deal),
       propertyId: deal.property.id,
+      shareToken: deal.shareToken ?? null,
       holdingMonths: analysis?.holdingMonths ?? null,
       financingCost: analysis ? Number(analysis.financingCost ?? 0) : null,
       sellingCostPct: analysis ? Number(analysis.sellingCostPct ?? 0) : null,
@@ -161,10 +171,59 @@ export async function getDealDetail(id: string): Promise<DealDetail | null> {
         distanceMiles: c.distanceMiles ? Number(c.distanceMiles) : null,
         source: c.source,
       })),
+      photos: deal.property.photos.map((p) => ({
+        id: p.id,
+        storagePath: p.storagePath,
+        caption: p.caption,
+      })),
     };
   } catch (err) {
     console.error("[data.getDealDetail]", err);
     return sampleDetail(id);
+  }
+}
+
+/**
+ * Read-only deal lookup by public share token (no auth) for the /share page.
+ * Returns null when sharing isn't configured or the token is unknown.
+ */
+export async function getSharedDeal(token: string): Promise<DealDetail | null> {
+  if (!isDatabaseConfigured) return null;
+  try {
+    const deal = await prisma.savedDeal.findFirst({
+      where: { shareToken: token },
+      include: {
+        property: {
+          include: {
+            analyses: { orderBy: { createdAt: "desc" }, take: 1 },
+            notes: { orderBy: { createdAt: "desc" } },
+          },
+        },
+      },
+    });
+    if (!deal) return null;
+    const analysis = deal.property.analyses[0];
+    return {
+      ...mapSummary(deal),
+      propertyId: deal.property.id,
+      shareToken: deal.shareToken ?? null,
+      holdingMonths: analysis?.holdingMonths ?? null,
+      financingCost: analysis ? Number(analysis.financingCost ?? 0) : null,
+      sellingCostPct: analysis ? Number(analysis.sellingCostPct ?? 0) : null,
+      closingCostEstimate: analysis
+        ? Number(analysis.closingCostEstimate ?? 0)
+        : null,
+      notes: deal.property.notes.map((n) => ({
+        id: n.id,
+        body: n.body,
+        createdAt: n.createdAt.toISOString().slice(0, 10),
+      })),
+      comps: [],
+      photos: [],
+    };
+  } catch (err) {
+    console.error("[data.getSharedDeal]", err);
+    return null;
   }
 }
 
@@ -174,11 +233,13 @@ function sampleDetail(id: string): DealDetail | null {
   return {
     ...deal,
     propertyId: deal.id,
+    shareToken: null,
     holdingMonths: 6,
     financingCost: 1500,
     sellingCostPct: 7,
     closingCostEstimate: 4000,
     notes: [],
     comps: [],
+    photos: [],
   };
 }

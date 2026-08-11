@@ -54,6 +54,10 @@ green / yellow / red verdict — built for fast decisions on mobile or desktop.
 - **Pipeline map** (`/map`) — every deal plotted and color-coded by verdict
   (Google Maps; degrades to a location list without a key).
 - **Command palette** — ⌘K / Ctrl+K to jump to any page or deal instantly.
+- **Property photos** — upload walkthrough/listing photos per deal to a private
+  Supabase Storage bucket (owner-scoped, signed-URL gallery).
+- **Shareable deal sheet** — generate a public, read-only `/share/<token>` link
+  for a deal to send a lender/partner; revocable anytime.
 - **BRRRR refinance** — new-loan, cash-out, and capital-left-in math with
   infinite-return detection, right on the Rental page.
 - **Rehab presets** — Cosmetic / Moderate / Gut one-click line-item budgets.

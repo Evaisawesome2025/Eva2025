@@ -65,6 +65,16 @@ export const settingsBodySchema = z
   })
   .passthrough();
 
+export const photoBodySchema = z.object({
+  propertyId: z.string().uuid(),
+  storagePath: z.string().min(1).max(500),
+  caption: z.string().max(200).optional(),
+});
+
+export const shareBodySchema = z.object({
+  dealId: z.string().uuid(),
+});
+
 /**
  * Parse a Request's JSON body against a schema.
  * Returns { data } on success or { error } (a ready-to-return message) on failure.

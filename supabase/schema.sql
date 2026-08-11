@@ -113,11 +113,25 @@ create table if not exists public.saved_deals (
   analysis_id uuid references public.property_analysis(id) on delete set null,
   status      text not null default 'watching'
               check (status in ('watching','pursuing','offer_made','under_contract','passed')),
+  share_token text unique,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
   unique (user_id, property_id)
 );
 create index if not exists saved_deals_user_id_idx on public.saved_deals(user_id);
+
+-- ---------------------------------------------------------------------------
+-- property_photos (metadata; image bytes live in Supabase Storage)
+-- ---------------------------------------------------------------------------
+create table if not exists public.property_photos (
+  id           uuid primary key default uuid_generate_v4(),
+  property_id  uuid not null references public.properties(id) on delete cascade,
+  user_id      uuid not null references public.users(id) on delete cascade,
+  storage_path text not null,
+  caption      text,
+  created_at   timestamptz not null default now()
+);
+create index if not exists property_photos_property_id_idx on public.property_photos(property_id);
 
 -- ---------------------------------------------------------------------------
 -- notes
@@ -175,6 +189,7 @@ alter table public.property_analysis enable row level security;
 alter table public.comparable_sales  enable row level security;
 alter table public.saved_deals       enable row level security;
 alter table public.notes             enable row level security;
+alter table public.property_photos   enable row level security;
 alter table public.data_sources      enable row level security;
 
 -- users: a user can read/update only their own profile row.
@@ -197,6 +212,10 @@ create policy "saved_deals owner" on public.saved_deals
 
 drop policy if exists "notes owner" on public.notes;
 create policy "notes owner" on public.notes
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "property_photos owner" on public.property_photos;
+create policy "property_photos owner" on public.property_photos
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- comparable_sales: scoped via the parent property's owner.
@@ -247,3 +266,32 @@ insert into public.data_sources (key, name, category, approved, enabled, notes) 
   ('county_gis',       'County GIS / Open Data',    'public_records', true,  false, 'Minnehaha/Lincoln County parcel data.'),
   ('mls_idx',          'Broker MLS / IDX Feed',     'comps',          true,  false, 'Licensed IDX feed only.')
 on conflict (key) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Storage bucket for property photos (private; owner-scoped access).
+-- Paths are namespaced by user id: `<auth.uid()>/<property_id>/<file>`.
+-- ---------------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('property-photos', 'property-photos', false)
+on conflict (id) do nothing;
+
+drop policy if exists "property-photos owner read" on storage.objects;
+create policy "property-photos owner read" on storage.objects
+  for select using (
+    bucket_id = 'property-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "property-photos owner write" on storage.objects;
+create policy "property-photos owner write" on storage.objects
+  for insert with check (
+    bucket_id = 'property-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "property-photos owner delete" on storage.objects;
+create policy "property-photos owner delete" on storage.objects
+  for delete using (
+    bucket_id = 'property-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
